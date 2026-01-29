@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ben's Personal OS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d0d0d;
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 0;
+            border-bottom: 1px solid #2a2a2a;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+
+        header p {
+            color: #666;
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: #161616;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+
+        .card:hover {
+            border-color: #3a3a3a;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .card-header h2 {
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888;
+        }
+
+        .card-icon {
+            font-size: 1.2rem;
+            opacity: 0.6;
+        }
+
+        /* Form styles */
+        .input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        input, textarea, select {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 6px;
+            padding: 10px 12px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #555;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        button {
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            padding: 10px 16px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        button:hover {
+            background: #3a3a3a;
+        }
+
+        button.primary {
+            background: #e0e0e0;
+            color: #0d0d0d;
+            border-color: #e0e0e0;
+        }
+
+        button.primary:hover {
+            background: #fff;
+        }
+
+        button.danger {
+            background: transparent;
+            border-color: #4a2a2a;
+            color: #cc6666;
+        }
+
+        button.danger:hover {
+            background: #4a2a2a;
+        }
+
+        /* List styles */
+        .item-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .item-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .item-list::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .item-list::-webkit-scrollbar-thumb {
+            background: #3a3a3a;
+            border-radius: 3px;
+        }
+
+        .list-item {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 14px;
+            position: relative;
+        }
+
+        .list-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .list-item-content {
+            flex: 1;
+        }
+
+        .list-item-title {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .list-item-text {
+            font-size: 0.85rem;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .list-item-meta {
+            font-size: 0.75rem;
+            color: #555;
+            margin-top: 8px;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .list-item-actions button {
+            padding: 6px 10px;
+            font-size: 0.75rem;
+        }
+
+        /* Metrics specific */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .metric-input {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .metric-input label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-input input {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Quick stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #2a2a2a;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-change {
+            font-size: 0.75rem;
+            margin-top: 4px;
+        }
+
+        .stat-change.positive {
+            color: #66cc88;
+        }
+
+        .stat-change.negative {
+            color: #cc6666;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Edit mode */
+        .editing {
+            border-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BEN'S PERSONAL OS</h1>
+            <p>Your command center for building, growing, and creating</p>
+        </header>
+
+        <div class="grid">
+            <!-- Site Suggestions -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Site Suggestions</h2>
+                    <span class="card-icon">💡</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="suggestionInput" placeholder="Add a suggestion for UpNextAnalytics...">
+                    <button class="primary" onclick="addSuggestion()">Add</button>
+                </div>
+                <div class="item-list" id="suggestionList">
+                    <div class="empty-state">No suggestions yet</div>
+                </div>
+            </div>
+
+            <!-- Instagram Tracker -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Instagram Growth</h2>
+                    <span class="card-icon">📸</span>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-input">
+                        <label>Followers</label>
+                        <input type="number" id="instaFollowers" placeholder="0">
+                    </div>
+                    <div class="metric-input">
+                        <label>Daily Gain</label>
+                        <input type="number" id="instaGain" placeholder="+0">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <input type="date" id="instaDate">
+                    <button class="primary" onclick="logInstagram()">Log</button>
+                </div>
+                <div class="item-list" id="instagramList">
+                    <div class="empty-state">No entries yet</div>
+                </div>
+                <div class="quick-stats" id="instaStats">
+                    <div class="stat">
+                        <div class="stat-value" id="totalEntries">0</div>
+                        <div class="stat-label">Entries</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="totalGain">0</div>
+                        <div class="stat-label">Total Gain</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Ideas -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Product Ideas</h2>
+                    <span class="card-icon">🚀</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="ideaInput" placeholder="New product idea...">
+                    <button class="primary" onclick="addIdea()">Add</button>
+                </div>
+                <div class="item-list" id="ideaList">
+                    <div class="empty-state">No ideas yet</div>
+                </div>
+            </div>
+
+            <!-- Research -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Research</h2>
+                    <span class="card-icon">🔬</span>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="researchTitle" placeholder="Research topic...">
+                </div>
+                <div class="input-group">
+                    <textarea id="researchText" placeholder="Key findings..."></textarea>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="researchSource" placeholder="Source (optional)">
+                    <button class="primary" onclick="addResearch()">Add</button>
+                </div>
+                <div class="item-list" id="researchList">
+                    <div class="empty-state">No research yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage keys
+        const STORAGE_KEYS = {
+            suggestions: 'personalOS_suggestions',
+            instagram: 'personalOS_instagram',
+            ideas: 'personalOS_ideas',
+            research: 'personalOS_research'
+        };
+
+        // Initialize data
+        let data = {
+            suggestions: JSON.parse(localStorage.getItem(STORAGE_KEYS.suggestions) || '[]'),
+            instagram: JSON.parse(localStorage.getItem(STORAGE_KEYS.instagram) || '[]'),
+            ideas: JSON.parse(localStorage.getItem(STORAGE_KEYS.ideas) || '[]'),
+            research: JSON.parse(localStorage.getItem(STORAGE_KEYS.research) || '[]')
+        };
+
+        // Set default date to today
+        document.getElementById('instaDate').valueAsDate = new Date();
+
+        // Save functions
+        function save(key) {
+            localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data[key]));
+        }
+
+        // Render functions
+        function renderSuggestions() {
+            const list = document.getElementById('suggestionList');
+            if (data.suggestions.length === 0) {
+                list.innerHTML = '<div class="empty-state">No suggestions yet</div>';
+                return;
+            }
+            list.innerHTML = data.suggestions.map((item, i) => `
+                <div class="list-item">
+                    <div class="list-item-header">
+                        <div class="list-item-content">
+                            <div class="list-item-text">${escapeHtml(item.text)}</div>
+                            <div class="list-item-meta">${formatDate(item.date)}</div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="danger" onclick="deleteSuggestion(${i})">×</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderInstagram() {
+            const list = document.getElementById('instagramList');
+            if (data.instagram.length === 0) {
+                list.innerHTML = '<div class="empty-state">No entries yet</div>';
+            } else {
+                list.innerHTML = data.instagram.slice().reverse().map((item, i) => `
+                    <div class="list-item">
+                        <div class="list-item-header">
+                            <div class="list-item-content">
+                                <div class="list-item-title">${formatDate(item.date)}</div>
+                                <div class="list-item-meta">
+                                    👥 ${formatNumber(item.followers)} followers
+                                    ${item.gain !== 0 ? ` · ${item.gain > 0 ? '+' : ''}${formatNumber(item.gain)} today` : ''}
+                                </div>
+                            </div>
+                            <div class="list-item-actions">
+                                <button class="danger" onclick="deleteInstagram(${data.instagram.length - 1 - i})">×</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            updateInstagramStats();
+        }
+
+        function updateInstagramStats() {
+            const entries = data.instagram.length;
+            const totalGain = data.instagram.reduce((sum, i) => sum + i.gain, 0);
+
+            document.getElementById('totalEntries').textContent = entries;
+            document.getElementById('totalGain').textContent = (totalGain > 0 ? '+' : '') + formatNumber(totalGain);
+        }
+
+        function renderIdeas() {
+            const list = document.getElementById('ideaList');
+            if (data.ideas.length === 0) {
+                list.innerHTML = '<div class="empty-state">No ideas yet</div>';
+                return;
+            }
+            list.innerHTML = data.ideas.map((item, i) => `
+                <div class="list-item">
+                    <div class="list-item-header">
+                        <div class="list-item-content">
+                            <div class="list-item-text">${escapeHtml(item.text)}</div>
+                            <div class="list-item-meta">${formatDate(item.date)}</div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="danger" onclick="deleteIdea(${i})">×</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderResearch() {
+            const list = document.getElementById('researchList');
+            if (data.research.length === 0) {
+                list.innerHTML = '<div class="empty-state">No research yet</div>';
+                return;
+            }
+            list.innerHTML = data.research.map((item, i) => `
+                <div class="list-item">
+                    <div class="list-item-header">
+                        <div class="list-item-content">
+                            <div class="list-item-title">${escapeHtml(item.title)}</div>
+                            <div class="list-item-text">${escapeHtml(item.text)}</div>
+                            ${item.source ? `<div class="list-item-meta">Source: ${escapeHtml(item.source)}</div>` : ''}
+                            <div class="list-item-meta">${formatDate(item.date)}</div>
+                        </div>
+                        <div class="list-item-actions">
+                            <button class="danger" onclick="deleteResearch(${i})">×</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Action functions
+        function addSuggestion() {
+            const input = document.getElementById('suggestionInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            data.suggestions.push({ text, date: new Date().toISOString() });
+            save('suggestions');
+            renderSuggestions();
+            input.value = '';
+        }
+
+        function deleteSuggestion(index) {
+            data.suggestions.splice(index, 1);
+            save('suggestions');
+            renderSuggestions();
+        }
+
+        function logInstagram() {
+            const followers = parseInt(document.getElementById('instaFollowers').value) || 0;
+            const gain = parseInt(document.getElementById('instaGain').value) || 0;
+            const date = document.getElementById('instaDate').value;
+
+            if (!date) return;
+
+            data.instagram.push({ followers, gain, date });
+            save('instagram');
+            renderInstagram();
+
+            // Clear inputs
+            document.getElementById('instaFollowers').value = '';
+            document.getElementById('instaGain').value = '';
+        }
+
+        function deleteInstagram(index) {
+            data.instagram.splice(index, 1);
+            save('instagram');
+            renderInstagram();
+        }
+
+        function addIdea() {
+            const input = document.getElementById('ideaInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            data.ideas.push({ text, date: new Date().toISOString() });
+            save('ideas');
+            renderIdeas();
+            input.value = '';
+        }
+
+        function deleteIdea(index) {
+            data.ideas.splice(index, 1);
+            save('ideas');
+            renderIdeas();
+        }
+
+        function addResearch() {
+            const title = document.getElementById('researchTitle').value.trim();
+            const text = document.getElementById('researchText').value.trim();
+            const source = document.getElementById('researchSource').value.trim();
+
+            if (!title && !text) return;
+
+            data.research.push({
+                title: title || 'Untitled',
+                text,
+                source,
+                date: new Date().toISOString()
+            });
+            save('research');
+            renderResearch();
+
+            // Clear inputs
+            document.getElementById('researchTitle').value = '';
+            document.getElementById('researchText').value = '';
+            document.getElementById('researchSource').value = '';
+        }
+
+        function deleteResearch(index) {
+            data.research.splice(index, 1);
+            save('research');
+            renderResearch();
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+            });
+        }
+
+        function formatNumber(num) {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return num.toString();
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                const id = e.target.id;
+                if (id === 'suggestionInput') addSuggestion();
+                if (id === 'ideaInput') addIdea();
+                if (id === 'researchTitle' || id === 'researchSource') addResearch();
+            }
+        });
+
+        // Initial render
+        renderSuggestions();
+        renderInstagram();
+        renderIdeas();
+        renderResearch();
+    </script>
+</body>
+</html>

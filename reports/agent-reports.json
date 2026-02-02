@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-02T06:45:46.968Z",
+  "lastUpdated": "2026-02-02T06:47:17.430Z",
   "agents": {
     "beacon": {
       "name": "Beacon",
@@ -28,10 +28,10 @@
     "scout": {
       "name": "Scout",
       "role": "Researcher",
-      "status": "complete",
-      "currentTask": "Competitor analysis",
-      "lastReport": "Feb 1, 10:48 PM",
-      "report": "Analyzed 5 competitors: TopDrawerSoccer, GotSport, Soccerway, Sofascore, Transfermarkt. Key finding: No youth-specific MLS NEXT platform exists. 3 feature opportunities identified."
+      "status": "idle",
+      "currentTask": "Ready for research",
+      "lastReport": "Feb 2, 1:47 AM",
+      "report": "Awaiting research assignment. Last task: competitor analysis complete"
     },
     "sentinel": {
       "name": "Sentinel",

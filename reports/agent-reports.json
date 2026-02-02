@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-02-02T10:19:04.588Z",
+  "lastUpdated": "2026-02-02T10:20:14.133Z",
   "agents": {
     "beacon": {
       "name": "Beacon",
@@ -20,10 +20,10 @@
     "echo": {
       "name": "Echo",
       "role": "Content Creator",
-      "status": "idle",
-      "currentTask": "Ready for content",
-      "lastReport": "Feb 2, 4:48 AM",
-      "report": "Checked Mission Control — 2 tasks pending: blog post (assigned) + docs update (inbox). Awaiting assignment."
+      "status": "active",
+      "currentTask": "Writing blog post",
+      "lastReport": "Feb 2, 5:20 AM",
+      "report": "Heartbeat checked — 2 tasks pending: blog post (assigned) + docs update (inbox). Ready to work on blog post assignment."
     },
     "scout": {
       "name": "Scout",

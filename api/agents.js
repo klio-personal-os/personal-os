@@ -4,29 +4,36 @@
 const fs = require('fs');
 const path = require('path');
 
-// Try to read from reports JSON (works in Vercel if file is in repo)
-const REPORTS_PATH = path.join(__dirname, '..', 'reports', 'agent-reports.json');
+// Try multiple paths for Vercel compatibility
+const possiblePaths = [
+    path.join(process.cwd(), 'reports', 'agent-reports.json'),
+    path.join(__dirname, '..', 'reports', 'agent-reports.json'),
+    path.join(__dirname, '..', '..', 'reports', 'agent-reports.json'),
+    '/home/ben/personal-os/reports/agent-reports.json'
+];
 
 function getAgentsData() {
-    try {
-        if (fs.existsSync(REPORTS_PATH)) {
-            const data = JSON.parse(fs.readFileSync(REPORTS_PATH, 'utf-8'));
-            const agents = [];
-            for (const [id, agent] of Object.entries(data.agents || {})) {
-                agents.push({
-                    id: id,
-                    name: agent.name,
-                    role: agent.role,
-                    status: agent.status,
-                    currentTask: agent.currentTask,
-                    lastReport: agent.lastReport,
-                    report: agent.report
-                });
+    for (const reportsPath of possiblePaths) {
+        try {
+            if (fs.existsSync(reportsPath)) {
+                const data = JSON.parse(fs.readFileSync(reportsPath, 'utf-8'));
+                const agents = [];
+                for (const [id, agent] of Object.entries(data.agents || {})) {
+                    agents.push({
+                        id: id,
+                        name: agent.name,
+                        role: agent.role,
+                        status: agent.status,
+                        currentTask: agent.currentTask,
+                        lastReport: agent.lastReport,
+                        report: agent.report
+                    });
+                }
+                return agents;
             }
-            return agents;
+        } catch (err) {
+            // Try next path
         }
-    } catch (err) {
-        console.error('Error reading agents data:', err);
     }
 
     // Fallback data

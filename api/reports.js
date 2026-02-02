@@ -4,15 +4,25 @@
 const fs = require('fs');
 const path = require('path');
 
-const REPORTS_PATH = path.join(__dirname, '..', 'reports', 'agent-reports.json');
+// Try multiple paths for Vercel compatibility
+const possiblePaths = [
+    path.join(process.cwd(), 'reports', 'agent-reports.json'),
+    path.join(__dirname, '..', 'reports', 'agent-reports.json'),
+    path.join(__dirname, '..', '..', 'reports', 'agent-reports.json'),
+    '/home/ben/personal-os/reports/agent-reports.json'
+];
 
 function getReportsData() {
-    try {
-        if (fs.existsSync(REPORTS_PATH)) {
-            return JSON.parse(fs.readFileSync(REPORTS_PATH, 'utf-8'));
+    for (const reportsPath of possiblePaths) {
+        try {
+            if (fs.existsSync(reportsPath)) {
+                const data = JSON.parse(fs.readFileSync(reportsPath, 'utf-8'));
+                console.log('Found reports at:', reportsPath);
+                return data;
+            }
+        } catch (err) {
+            console.log('Path not found:', reportsPath);
         }
-    } catch (err) {
-        console.error('Error reading reports:', err);
     }
     return null;
 }
@@ -22,9 +32,9 @@ module.exports = (req, res) => {
     
     const data = getReportsData();
     
-    if (data) {
+    if (data && data.agents) {
         // Format for frontend
-        const reports = Object.entries(data.agents || {}).map(([id, agent]) => ({
+        const reports = Object.entries(data.agents).map(([id, agent]) => ({
             agent: { id, name: agent.name, role: agent.role, avatar: getAvatar(id) },
             status: agent.status,
             currentTask: agent.currentTask,
@@ -34,8 +44,8 @@ module.exports = (req, res) => {
         res.status(200).json({
             success: true,
             reports: reports,
-            activities: [], // Could add activity tracking later
-            ideas: [], // Could add ideas from separate file
+            activities: [],
+            ideas: [],
             timestamp: data.lastUpdated
         });
     } else {
@@ -44,7 +54,8 @@ module.exports = (req, res) => {
             reports: [],
             activities: [],
             ideas: [],
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            note: 'No report data found'
         });
     }
 };

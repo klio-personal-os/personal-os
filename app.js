@@ -128,11 +128,13 @@ class MissionControl {
         } else if (viewName === 'reports') {
             this.renderReports();
             this.loadHourlyReport();
+            this.loadFeatures();
             // Auto-refresh every 30 seconds
             if (this.reportsInterval) clearInterval(this.reportsInterval);
             this.reportsInterval = setInterval(() => {
                 this.renderReports();
                 this.loadHourlyReport();
+                this.loadFeatures();
             }, 30000);
         }
     }
@@ -969,6 +971,94 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
             notification.style.animation = 'fadeOut 0.3s ease-in forwards';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
+    }
+
+    async loadFeatures() {
+        const container = document.getElementById('features-list');
+        container.innerHTML = '<div class="loading">Loading features...</div>';
+        
+        try {
+            const response = await fetch('/api/features');
+            const data = await response.json();
+            
+            if (data.success && data.features) {
+                container.innerHTML = data.features.map(feature => `
+                    <div class="feature-item">
+                        <div class="feature-icon">${this.getFeatureIcon(feature.id)}</div>
+                        <div class="feature-content">
+                            <div class="feature-name">${feature.name}</div>
+                            <div class="feature-desc">${feature.description}</div>
+                            <div class="feature-meta">
+                                <span class="status-${feature.status}">${feature.status.toUpperCase()}</span>
+                                <span>Priority: ${feature.priority}</span>
+                                <span>Agents: ${feature.agents.join(', ')}</span>
+                            </div>
+                        </div>
+                        <div class="feature-actions">
+                            ${feature.status === 'pending' ? `
+                                <button class="feature-btn feature-btn-approve" onclick="app.approveFeature('${feature.id}')">Approve</button>
+                                <button class="feature-btn feature-btn-decline" onclick="app.declineFeature('${feature.id}')">Decline</button>
+                            ` : feature.status === 'approved' ? `
+                                <button class="feature-btn feature-btn-decline" onclick="app.declineFeature('${feature.id}')">Decline</button>
+                            ` : `
+                                <button class="feature-btn feature-btn-approve" onclick="app.approveFeature('${feature.id}')">Re-approve</button>
+                            `}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<p style="color: var(--text-muted);">No features found</p>';
+            }
+        } catch (err) {
+            container.innerHTML = '<p style="color: var(--text-muted);">Error loading features</p>';
+        }
+    }
+
+    getFeatureIcon(id) {
+        const icons = {
+            'stat-stories': '📊',
+            'game-previews': '⚽',
+            'team-analytics': '📈'
+        };
+        return icons[id] || '🎯';
+    }
+
+    async approveFeature(featureId) {
+        try {
+            const response = await fetch('/api/features', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ featureId, status: 'approved' })
+            });
+            const data = await response.json();
+            if (data.success) {
+                this.showNotification(`Approved: ${featureId}`, 'success');
+                this.loadFeatures();
+            } else {
+                this.showNotification('Failed to approve', 'error');
+            }
+        } catch (err) {
+            this.showNotification('Error approving feature', 'error');
+        }
+    }
+
+    async declineFeature(featureId) {
+        try {
+            const response = await fetch('/api/features', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ featureId, status: 'declined' })
+            });
+            const data = await response.json();
+            if (data.success) {
+                this.showNotification(`Declined: ${featureId}`, 'success');
+                this.loadFeatures();
+            } else {
+                this.showNotification('Failed to decline', 'error');
+            }
+        } catch (err) {
+            this.showNotification('Error declining feature', 'error');
+        }
     }
 }
 

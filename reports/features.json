@@ -1,0 +1,31 @@
+[
+  {
+    "id": "stat-stories",
+    "name": "Stat Stories",
+    "description": "Shareable Instagram highlight cards for player stats",
+    "status": "approved",
+    "approvedBy": "Ben",
+    "approvedAt": "2026-02-02T17:00:00Z",
+    "agents": ["beacon", "forge", "echo", "sentinel"],
+    "priority": "high",
+    "notes": "Core feature for Instagram growth"
+  },
+  {
+    "id": "game-previews",
+    "name": "Game Previews",
+    "description": "Match preview cards with key stats and history",
+    "status": "pending",
+    "agents": ["scout", "beacon"],
+    "priority": "medium",
+    "notes": "Need validation research first"
+  },
+  {
+    "id": "team-analytics",
+    "name": "Team Analytics",
+    "description": "Dashboards for team performance tracking",
+    "status": "pending",
+    "agents": ["scout"],
+    "priority": "low",
+    "notes": "Future feature, research phase"
+  }
+]

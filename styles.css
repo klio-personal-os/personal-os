@@ -1498,6 +1498,118 @@ body {
     border: 1px solid var(--border-color);
 }
 
+/* Features List */
+.features-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    transition: all var(--transition-speed);
+}
+
+.feature-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.feature-icon {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+.feature-content {
+    flex: 1;
+}
+
+.feature-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.feature-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.feature-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.feature-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.feature-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.feature-btn-approve {
+    background: rgba(40, 200, 64, 0.2);
+    color: #28c840;
+}
+
+.feature-btn-approve:hover {
+    background: #28c840;
+    color: white;
+}
+
+.feature-btn-decline {
+    background: rgba(255, 100, 100, 0.2);
+    color: #ff6464;
+}
+
+.feature-btn-decline:hover {
+    background: #ff6464;
+    color: white;
+}
+
+.feature-btn-pending {
+    background: rgba(255, 200, 50, 0.2);
+    color: #ffc832;
+}
+
+.status-approved {
+    color: #28c840;
+}
+
+.status-declined {
+    color: #ff6464;
+}
+
+.status-pending {
+    color: #ffc832;
+}
+
 /* Product Ideas */
 .ideas-list {
     display: flex;

@@ -1,9 +1,14 @@
-// Klio Admin Dashboard - Main Application
-class AdminApp {
+// Personal OS Admin Dashboard - Application Logic
+class DashboardApp {
     constructor() {
-        this.currentPage = 'dashboard';
+        this.currentView = 'dashboard';
         this.monitoringActive = true;
-        this.monitorInterval = null;
+        this.updateInterval = null;
+        this.historyData = {
+            cpu: Array(20).fill(0),
+            memory: Array(20).fill(0),
+            storage: Array(20).fill(0)
+        };
 
         this.skills = [
             { id: 'github', name: 'GitHub', icon: '🐙', status: 'active', description: 'Repository management, PRs, issues' },
@@ -27,40 +32,42 @@ class AdminApp {
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupNavigation();
         this.setupTerminal();
         this.updateClock();
         this.fetchSystemStatus();
-        this.startMonitoring();
+        this.startStatusUpdates();
         setInterval(() => this.updateClock(), 1000);
     }
 
-    // Navigation
     setupNavigation() {
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
+        document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = item.dataset.page;
-                this.navigateTo(page);
+                this.switchView(page);
+
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
             });
         });
     }
 
-    navigateTo(page) {
-        // Update nav
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.toggle('active', item.dataset.page === page);
+    switchView(viewName) {
+        // Hide all views
+        document.querySelectorAll('.view').forEach(view => {
+            view.classList.remove('active');
         });
 
-        // Update pages
-        document.querySelectorAll('.page').forEach(p => {
-            p.style.display = 'none';
-        });
-        document.getElementById(`page-${page}`).style.display = 'block';
+        // Show selected view
+        const targetView = document.getElementById(`view-${viewName}`);
+        if (targetView) {
+            targetView.classList.add('active');
+            this.currentView = viewName;
+        }
 
-        // Update title
+        // Update page title
         const titles = {
             dashboard: 'Dashboard',
             skills: 'Skills',
@@ -69,77 +76,249 @@ class AdminApp {
             terminal: 'Terminal',
             settings: 'Settings'
         };
-        document.getElementById('current-page-title').textContent = titles[page] || 'Dashboard';
+        document.querySelector('.page-title').textContent = titles[viewName] || 'Dashboard';
 
-        this.currentPage = page;
-
-        // Load page data
-        if (page === 'skills') this.renderSkills();
-        if (page === 'services') this.renderServices();
-        if (page === 'monitor') this.startMonitoring();
-        else this.stopMonitoring();
+        // Load view-specific content
+        if (viewName === 'skills') {
+            this.renderSkills();
+        } else if (viewName === 'services') {
+            this.renderServices();
+        } else if (viewName === 'monitor' && this.monitoringActive) {
+            this.startMonitoring();
+        }
     }
 
-    // Clock
     updateClock() {
         const now = new Date();
-        const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-        document.getElementById('clock').textContent = now.toLocaleDateString('en-US', options);
+        const options = { 
+            weekday: 'short', 
+            month: 'short', 
+            day: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true
+        };
+        const clockEl = document.getElementById('clock');
+        if (clockEl) {
+            clockEl.textContent = now.toLocaleDateString('en-US', options);
+        }
     }
 
-    // System Status
     async fetchSystemStatus() {
         try {
             const response = await fetch('/api/status');
             if (response.ok) {
                 const data = await response.json();
                 this.updateDashboardStats(data);
+            } else {
+                // Use simulated data if API not available
+                this.updateDashboardStats(this.getSimulatedStatus());
             }
         } catch (error) {
-            console.log('Using simulated status');
-            this.updateDashboardStats({
-                cpu: Math.floor(Math.random() * 30) + 15,
-                memory: Math.floor(Math.random() * 8) + 4,
-                storage: Math.floor(Math.random() * 30) + 40,
-                uptime: Date.now() / 1000
-            });
+            console.log('Using simulated status (API not available)');
+            this.updateDashboardStats(this.getSimulatedStatus());
         }
+    }
+
+    getSimulatedStatus() {
+        return {
+            cpu: Math.floor(Math.random() * 40) + 15,
+            memory: (Math.random() * 8 + 4).toFixed(1),
+            storage: Math.floor(Math.random() * 30) + 40,
+            uptime: 86400 + Math.floor(Math.random() * 3600),
+            sessions: [
+                { name: 'Main Session', status: 'active', type: 'direct' },
+                { name: 'Sub-agent Session', status: 'active', type: 'subagent' }
+            ]
+        };
     }
 
     updateDashboardStats(data) {
-        document.getElementById('stat-cpu').textContent = `${data.cpu || 0}%`;
-        document.getElementById('stat-memory').textContent = `${data.memory || 0} GB`;
-        document.getElementById('stat-storage').textContent = `${data.storage || 0}%`;
+        // Update stat cards
+        const cpuEl = document.getElementById('stat-cpu');
+        const memEl = document.getElementById('stat-memory');
+        const storageEl = document.getElementById('stat-storage');
+        const uptimeEl = document.getElementById('stat-uptime');
 
-        const uptime = data.uptime || 0;
-        const hours = Math.floor(uptime / 3600);
-        const minutes = Math.floor((uptime % 3600) / 60);
-        document.getElementById('stat-uptime').textContent = `${hours}h ${minutes}m`;
+        if (cpuEl) cpuEl.textContent = `${data.cpu || 0}%`;
+        if (memEl) memEl.textContent = data.memory || '--';
+        if (storageEl) storageEl.textContent = `${data.storage || 0}%`;
+        if (uptimeEl) uptimeEl.textContent = this.formatUptime(data.uptime);
 
-        // Update system status text
-        const statusEl = document.getElementById('system-status-text');
-        if (data.status === 'online') {
-            statusEl.textContent = 'System Online';
+        // Update sparklines
+        this.updateSparkline('cpu-sparkline', data.cpu || 0);
+        this.updateSparkline('memory-sparkline', data.memory || 0);
+        this.updateSparkline('storage-sparkline', data.storage || 0);
+
+        // Update monitor page if visible
+        this.updateMonitorPage(data);
+    }
+
+    updateSparkline(id, value) {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        // Add value to history
+        const key = id.replace('-sparkline', '');
+        if (this.historyData[key]) {
+            this.historyData[key].push(value);
+            this.historyData[key].shift();
+        }
+
+        // Generate SVG path
+        const data = this.historyData[key] || [];
+        const width = 60;
+        const height = 20;
+        const min = Math.min(...data) * 0.9;
+        const max = Math.max(...data, min + 1) * 1.1;
+
+        const points = data.map((val, i) => {
+            const x = (i / (data.length - 1)) * width;
+            const y = height - ((val - min) / (max - min)) * height;
+            return `${x},${y}`;
+        }).join(' ');
+
+        el.innerHTML = `<polyline points="${points}" fill="none" stroke="#007AFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+
+    updateMonitorPage(data) {
+        const cpuEl = document.getElementById('monitor-cpu');
+        const memEl = document.getElementById('monitor-memory');
+        const storageEl = document.getElementById('monitor-storage');
+
+        if (cpuEl) cpuEl.textContent = data.cpu || '--';
+        if (memEl) memEl.textContent = data.memory || '--';
+        if (storageEl) storageEl.textContent = data.storage || '--';
+
+        // Update progress bars
+        const cpuBar = document.getElementById('monitor-cpu-bar');
+        const memBar = document.getElementById('monitor-memory-bar');
+        const storageBar = document.getElementById('monitor-storage-bar');
+
+        if (cpuBar) cpuBar.style.width = `${data.cpu || 0}%`;
+        if (memBar) memBar.style.width = `${data.memory || 0}%`;
+        if (storageBar) storageBar.style.width = `${data.storage || 0}%`;
+
+        // Update chart
+        this.updateChart(data.cpu || 0);
+    }
+
+    updateChart(value) {
+        // Add to history
+        this.historyData.chart = this.historyData.chart || Array(40).fill(0);
+        this.historyData.chart.push(value);
+        this.historyData.chart.shift();
+
+        const chartArea = document.getElementById('chart-area');
+        const chartLine = document.getElementById('chart-line');
+        if (!chartArea || !chartLine) return;
+
+        const width = 400;
+        const height = 100;
+        const min = 0;
+        const max = 100;
+        const data = this.historyData.chart;
+
+        const linePoints = data.map((val, i) => {
+            const x = (i / (data.length - 1)) * width;
+            const y = height - ((val - min) / (max - min)) * height;
+            return `${x},${y}`;
+        }).join(' ');
+
+        // Create filled area
+        const linePath = linePoints;
+        const areaPath = `${linePath} L${width},${height} L0,${height} Z`;
+
+        chartLine.setAttribute('d', `M${linePoints.replace(/ /g, ' L')}`);
+        chartArea.setAttribute('d', `M${areaPath.replace(/ /g, ' L')}`);
+    }
+
+    startStatusUpdates() {
+        this.updateInterval = setInterval(async () => {
+            if (!this.monitoringActive) return;
+
+            try {
+                const response = await fetch('/api/status');
+                if (response.ok) {
+                    const data = await response.json();
+                    this.updateDashboardStats(data);
+                }
+            } catch (error) {
+                this.updateDashboardStats(this.getSimulatedStatus());
+            }
+        }, 3000);
+    }
+
+    formatUptime(seconds) {
+        if (!seconds) return '--';
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
+
+        if (days > 0) return `${days}d ${hours}h`;
+        if (hours > 0) return `${hours}h ${mins}m`;
+        return `${mins}m`;
+    }
+
+    toggleMonitoring() {
+        this.monitoringActive = !this.monitoringActive;
+        const toggleText = document.getElementById('monitor-toggle-text');
+        const toggleBtn = document.getElementById('monitor-toggle');
+
+        if (toggleText) {
+            toggleText.textContent = this.monitoringActive ? 'Pause' : 'Resume';
+        }
+
+        if (this.monitoringActive) {
+            this.startStatusUpdates();
+        } else {
+            clearInterval(this.updateInterval);
         }
     }
 
+    refreshMonitor() {
+        this.fetchSystemStatus();
+    }
+
     // Skills
-    renderSkills() {
+    async renderSkills() {
         const grid = document.getElementById('skills-grid');
+        if (!grid) return;
+
+        try {
+            const response = await fetch('/api/skills');
+            if (response.ok) {
+                const skillsData = await response.json();
+                // Merge with local skills
+                this.skills = Object.entries(skillsData).map(([id, data]) => ({
+                    id,
+                    ...data,
+                    name: this.skills.find(s => s.id === id)?.name || id,
+                    icon: this.skills.find(s => s.id === id)?.icon || '📦',
+                    description: this.skills.find(s => s.id === id)?.description || ''
+                }));
+            }
+        } catch (error) {
+            console.log('Using local skills data');
+        }
+
         grid.innerHTML = this.skills.map(skill => `
-            <div class="skill-card">
+            <div class="skill-card" data-skill-id="${skill.id}">
                 <div class="skill-card-header">
                     <span class="skill-icon">${skill.icon}</span>
-                    <span class="skill-status ${skill.status}">${skill.status}</span>
+                    <span class="skill-status ${skill.status}">
+                        <span class="skill-status-dot"></span>
+                        ${skill.status}
+                    </span>
                 </div>
-                <h4>${skill.name}</h4>
-                <p class="skill-desc">${skill.description}</p>
+                <h4 class="skill-name">${skill.name}</h4>
+                <p class="skill-description">${skill.description}</p>
                 <div class="skill-actions">
-                    <button class="skill-btn ${skill.status === 'active' ? 'stop' : 'start'}"
+                    <button class="skill-btn ${skill.status === 'active' ? 'danger' : 'primary'}" 
                             onclick="app.toggleSkill('${skill.id}')">
                         ${skill.status === 'active' ? '⏹️ Stop' : '▶️ Start'}
                     </button>
-                    <button class="skill-btn action" onclick="app.showSkillActions('${skill.id}')">
+                    <button class="skill-btn secondary" onclick="app.showSkillActions('${skill.id}')">
                         ⚡ Actions
                     </button>
                 </div>
@@ -147,25 +326,46 @@ class AdminApp {
         `).join('');
     }
 
-    toggleSkill(skillId) {
+    async toggleSkill(skillId) {
         const skill = this.skills.find(s => s.id === skillId);
-        if (skill) {
-            skill.status = skill.status === 'active' ? 'inactive' : 'active';
+        if (!skill) return;
+
+        const newStatus = skill.status === 'active' ? 'inactive' : 'active';
+
+        try {
+            const response = await fetch(`/api/skills/${skillId}/${newStatus === 'active' ? 'start' : 'stop'}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                skill.status = newStatus;
+                this.renderSkills();
+            }
+        } catch (error) {
+            // Update locally if API fails
+            skill.status = newStatus;
             this.renderSkills();
-            this.showNotification(`${skill.name} ${skill.status === 'active' ? 'started' : 'stopped'}`);
         }
     }
 
-    startAllSkills() {
-        this.skills.forEach(s => s.status = 'active');
-        this.renderSkills();
-        this.showNotification('All skills started');
+    async startAllSkills() {
+        this.showNotification('Starting all skills...');
+        for (const skill of this.skills) {
+            if (skill.status !== 'active') {
+                await this.toggleSkill(skill.id);
+            }
+        }
+        this.showNotification('All skills started!', 'success');
     }
 
-    stopAllSkills() {
-        this.skills.forEach(s => s.status = 'inactive');
-        this.renderSkills();
-        this.showNotification('All skills stopped');
+    async stopAllSkills() {
+        this.showNotification('Stopping all skills...');
+        for (const skill of this.skills) {
+            if (skill.status !== 'inactive') {
+                await this.toggleSkill(skill.id);
+            }
+        }
+        this.showNotification('All skills stopped!', 'success');
     }
 
     refreshSkills() {
@@ -175,146 +375,191 @@ class AdminApp {
 
     showSkillActions(skillId) {
         const actions = this.getSkillActions(skillId);
-        const actionNames = actions.map(a => a.label).join(', ');
-        this.showNotification(`${skillId}: ${actionNames}`);
+        const actionsList = actions.map(action => `
+            <button class="skill-btn secondary" onclick="app.executeSkillAction('${skillId}', '${action.id}')">
+                ${action.icon} ${action.label}
+            </button>
+        `).join('');
+
+        this.showNotification(`Actions for ${skillId}: ${actions.map(a => a.label).join(', ')}`);
     }
 
     getSkillActions(skillId) {
         const actions = {
-            'github': ['List Repositories', 'Create PR', 'Sync All'],
-            'coding-agent': ['New Task', 'Debug Mode', 'Optimize'],
-            'mcporter': ['List Servers', 'Start MCP', 'Restart All'],
-            'notion': ['Sync Pages', 'Query Database'],
-            'slack': ['Send Message', 'List Channels'],
-            'terminal': ['Clear Cache', 'Restart Terminal'],
-            'browser': ['Clear Cookies', 'Reset Session'],
-            'memory': ['Clear Memory', 'Export Context']
+            'github': [
+                { id: 'list-repos', icon: '📋', label: 'List Repos' },
+                { id: 'sync', icon: '🔄', label: 'Sync All' }
+            ],
+            'coding-agent': [
+                { id: 'new-task', icon: '✨', label: 'New Task' },
+                { id: 'debug', icon: '🐛', label: 'Debug Mode' }
+            ],
+            'mcporter': [
+                { id: 'list-servers', icon: '🖥️', label: 'List Servers' },
+                { id: 'restart-mcp', icon: '🔄', label: 'Restart All' }
+            ],
+            'notion': [
+                { id: 'sync-pages', icon: '📝', label: 'Sync Pages' },
+                { id: 'query-db', icon: '🔍', label: 'Query DB' }
+            ],
+            'slack': [
+                { id: 'send-msg', icon: '💬', label: 'Send Message' },
+                { id: 'list-channels', icon: '📋', label: 'List Channels' }
+            ],
+            'default': [
+                { id: 'status', icon: '📊', label: 'View Status' },
+                { id: 'reload', icon: '🔄', label: 'Reload' }
+            ]
         };
-        return (actions[skillId] || ['View Status']).map((label, i) => ({ id: i, label }));
+        return actions[skillId] || actions['default'];
+    }
+
+    async executeSkillAction(skillId, actionId) {
+        try {
+            const response = await fetch(`/api/skills/${skillId}/execute`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: actionId })
+            });
+
+            if (response.ok) {
+                this.showNotification(`Action "${actionId}" executed`, 'success');
+            }
+        } catch (error) {
+            this.showNotification(`Action "${actionId}" executed`, 'success');
+        }
     }
 
     // Services
-    renderServices() {
+    async renderServices() {
         const list = document.getElementById('services-list');
+        if (!list) return;
+
+        try {
+            const response = await fetch('/api/services');
+            if (response.ok) {
+                const servicesData = await response.json();
+                this.services = Object.entries(servicesData).map(([id, data]) => ({
+                    id,
+                    ...data,
+                    name: this.services.find(s => s.id === id)?.name || id,
+                    icon: this.services.find(s => s.id === id)?.icon || '🔧'
+                }));
+            }
+        } catch (error) {
+            console.log('Using local services data');
+        }
+
         list.innerHTML = this.services.map(service => `
             <div class="service-card">
-                <span class="service-icon">${service.icon}</span>
+                <div class="service-icon">${service.icon}</div>
                 <div class="service-info">
-                    <h4>${service.name}</h4>
-                    <p class="service-port">${service.port ? `Port: ${service.port}` : 'Core Service'}</p>
+                    <span class="service-name">${service.name}</span>
+                    <span class="service-port">${service.port ? `Port: ${service.port}` : 'Core Service'}</span>
                 </div>
                 <div class="service-status">
-                    <span class="skill-status ${service.status === 'running' ? 'active' : 'inactive'}">${service.status}</span>
+                    <span class="service-indicator ${service.status}"></span>
+                    <span style="font-size: 13px; color: var(--text-secondary);">${service.status}</span>
                 </div>
                 <div class="service-actions">
-                    ${service.status === 'running' ?
-                        `<button class="service-btn stop" onclick="app.controlService('${service.id}', 'stop')">⏹️</button>
-                         <button class="service-btn restart" onclick="app.controlService('${service.id}', 'restart')">🔄</button>` :
-                        `<button class="service-btn start" onclick="app.controlService('${service.id}', 'start')">▶️</button>`
-                    }
+                    ${service.status === 'running' ? `
+                        <button class="service-btn stop" onclick="app.controlService('${service.id}', 'stop')">⏹️</button>
+                        <button class="service-btn restart" onclick="app.controlService('${service.id}', 'restart')">🔄</button>
+                    ` : `
+                        <button class="service-btn start" onclick="app.controlService('${service.id}', 'start')">▶️</button>
+                    `}
                 </div>
             </div>
         `).join('');
     }
 
-    controlService(serviceId, action) {
-        const service = this.services.find(s => s.id === serviceId);
-        if (service) {
-            if (action === 'start') service.status = 'running';
-            else if (action === 'stop') service.status = 'stopped';
-            else if (action === 'restart') {
-                service.status = 'restarting';
-                setTimeout(() => { service.status = 'running'; this.renderServices(); }, 1000);
+    async controlService(serviceId, action) {
+        try {
+            const response = await fetch(`/api/services/${serviceId}/${action}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                this.showNotification(`${serviceId}: ${action}ing...`);
+                this.renderServices();
+                setTimeout(() => {
+                    this.showNotification(`${serviceId} ${action}ed successfully!`, 'success');
+                }, 500);
             }
-            this.renderServices();
-            this.showNotification(`${service.name} ${action}ed`);
+        } catch (error) {
+            // Update locally if API fails
+            const service = this.services.find(s => s.id === serviceId);
+            if (service) {
+                service.status = action === 'start' ? 'running' : 'stopped';
+                this.renderServices();
+                this.showNotification(`${serviceId} ${action}ed successfully!`, 'success');
+            }
         }
     }
 
     startAllServices() {
-        this.services.forEach(s => s.status = 'running');
-        this.renderServices();
-        this.showNotification('All services started');
+        this.showNotification('Starting all services...');
+        this.services.filter(s => s.status !== 'running').forEach(s => {
+            this.controlService(s.id, 'start');
+        });
     }
 
     stopAllServices() {
-        this.services.forEach(s => s.status = 'stopped');
-        this.renderServices();
-        this.showNotification('All services stopped');
+        this.showNotification('Stopping all services...');
+        this.services.filter(s => s.status !== 'stopped').forEach(s => {
+            this.controlService(s.id, 'stop');
+        });
     }
 
     restartAllServices() {
-        this.services.forEach(s => s.status = 'restarting');
-        this.renderServices();
-        setTimeout(() => {
-            this.services.forEach(s => s.status = 'running');
-            this.renderServices();
-            this.showNotification('All services restarted');
-        }, 1500);
+        this.showNotification('Restarting all services...');
+        this.services.forEach(s => {
+            this.controlService(s.id, 'restart');
+        });
     }
 
-    // Monitoring
-    startMonitoring() {
-        if (this.monitorInterval) return;
-        this.monitorInterval = setInterval(() => {
-            if (!this.monitoringActive) return;
-
-            const cpu = Math.floor(Math.random() * 30) + 15;
-            const memory = Math.floor(Math.random() * 8) + 4;
-            const storage = Math.floor(Math.random() * 20) + 45;
-
-            this.updateMonitor(cpu, memory, storage);
-        }, 2000);
-        this.updateMonitor(35, 6.2, 52);
-    }
-
-    stopMonitoring() {
-        if (this.monitorInterval) {
-            clearInterval(this.monitorInterval);
-            this.monitorInterval = null;
-        }
-    }
-
-    updateMonitor(cpu, memory, storage) {
-        document.getElementById('monitor-cpu').textContent = cpu;
-        document.getElementById('monitor-cpu-bar').style.width = `${cpu}%`;
-
-        document.getElementById('monitor-memory').textContent = memory;
-        document.getElementById('monitor-memory-bar').style.width = `${(memory / 16) * 100}%`;
-
-        document.getElementById('monitor-storage').textContent = storage;
-        document.getElementById('monitor-storage-bar').style.width = `${storage}%`;
-
-        const network = (Math.random() * 5 + 0.5).toFixed(1);
-        document.getElementById('monitor-network').textContent = `↓ ${network}`;
-    }
-
-    toggleMonitoring() {
-        this.monitoringActive = !this.monitoringActive;
-        const btn = document.getElementById('monitor-toggle');
-        const icon = document.getElementById('monitor-toggle-icon');
-        icon.textContent = this.monitoringActive ? '⏸️' : '▶️';
-        btn.querySelector('span:last-child').textContent = this.monitoringActive ? 'Pause' : 'Resume';
-    }
-
-    refreshMonitor() {
-        this.updateMonitor(35, 6.2, 52);
-        this.showNotification('Monitor refreshed');
-    }
-
+    // Activity
     refreshActivity() {
         const activityList = document.getElementById('activity-list');
-        const items = activityList.querySelectorAll('.activity-item');
-        items.forEach(item => {
-            const time = item.querySelector('.activity-time');
-            if (time) time.textContent = 'Just now';
+        if (!activityList) return;
+
+        // Add a new activity item
+        const activities = [
+            { icon: '🧠', text: 'Memory updated' },
+            { icon: '🔧', text: 'Service health check' },
+            { icon: '💬', text: 'Notification sent' },
+            { icon: '📊', text: 'Stats aggregated' }
+        ];
+
+        const newActivity = activities[Math.floor(Math.random() * activities.length)];
+
+        activityList.insertBefore(`
+            <div class="activity-item">
+                <span class="activity-icon">${newActivity.icon}</span>
+                <span class="activity-text">${newActivity.text}</span>
+                <span class="activity-time">just now</span>
+            </div>
+        `, activityList.firstChild);
+
+        // Update times of other items
+        const times = activityList.querySelectorAll('.activity-time');
+        times.forEach((el, i) => {
+            if (i === 0) {
+                el.textContent = 'just now';
+            } else {
+                const mins = i * 2;
+                el.textContent = `${mins}m ago`;
+            }
         });
+
         this.showNotification('Activity refreshed');
     }
 
     // Terminal
     setupTerminal() {
         const input = document.getElementById('terminal-input');
+        if (!input) return;
+
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 const command = input.value.trim();
@@ -328,20 +573,29 @@ class AdminApp {
 
     executeCommand(command) {
         const output = document.getElementById('terminal-output');
+        if (!output) return;
 
-        // Add command
+        // Add command to output
         const cmdLine = document.createElement('div');
         cmdLine.className = 'terminal-line';
-        cmdLine.textContent = `$ ${command}`;
+        cmdLine.innerHTML = `<span class="terminal-prompt">$</span> ${command}`;
         output.appendChild(cmdLine);
 
         // Process command
         let response = '';
-        let type = 'info';
+        let responseClass = '';
 
-        switch(command.toLowerCase()) {
+        switch (command.toLowerCase()) {
             case 'help':
-                response = 'Available commands: help, date, whoami, uptime, clear, echo, status, skills, services, cpu, memory';
+                response = `Available commands:
+  help     - Show this help
+  date     - Show current date/time
+  whoami   - Show current user
+  uptime   - Show system uptime
+  clear    - Clear terminal
+  status   - Show system status
+  skills   - List all skills
+  services - List all services`;
                 break;
             case 'date':
                 response = new Date().toString();
@@ -350,16 +604,15 @@ class AdminApp {
                 response = 'clawdbot';
                 break;
             case 'uptime':
-                response = `Uptime: ${Math.floor(performance.now() / 60000)} minutes`;
+                response = `System uptime: ${this.formatUptime(Date.now() / 1000)}`;
                 break;
             case 'clear':
                 output.innerHTML = '';
                 return;
-            case 'echo':
-                response = '';
-                break;
             case 'status':
-                response = 'System Status: All services running normally';
+                response = `CPU: ${document.getElementById('stat-cpu')?.textContent || '--'}
+Memory: ${document.getElementById('stat-memory')?.textContent || '--'} GB
+Storage: ${document.getElementById('stat-storage')?.textContent || '--'}%`;
                 break;
             case 'skills':
                 response = this.skills.map(s => `${s.icon} ${s.name}: ${s.status}`).join('\n');
@@ -367,66 +620,99 @@ class AdminApp {
             case 'services':
                 response = this.services.map(s => `${s.icon} ${s.name}: ${s.status}`).join('\n');
                 break;
-            case 'cpu':
-                response = `CPU Usage: ${Math.floor(Math.random() * 30) + 15}%`;
-                break;
-            case 'memory':
-                response = `Memory: ${(Math.random() * 8 + 4).toFixed(1)} GB`;
-                break;
             default:
+                responseClass = 'error';
                 response = `Command not found: ${command}. Type 'help' for available commands.`;
-                type = 'error';
         }
 
+        // Add response to output
         if (response) {
-            const respLine = document.createElement('div');
-            respLine.className = `terminal-line ${type}`;
-            respLine.textContent = response;
-            output.appendChild(respLine);
+            const responseLine = document.createElement('div');
+            responseLine.className = `terminal-line ${responseClass}`;
+            responseLine.innerHTML = response.replace(/\n/g, '<br>');
+            output.appendChild(responseLine);
         }
 
+        // Scroll to bottom
         output.scrollTop = output.scrollHeight;
     }
 
     clearTerminal() {
-        document.getElementById('terminal-output').innerHTML = `
-            <div class="terminal-line info">Terminal cleared</div>
-            <div class="terminal-line"></div>
-        `;
+        const output = document.getElementById('terminal-output');
+        if (output) {
+            output.innerHTML = `
+                <div class="terminal-line info">
+                    <span class="terminal-prompt">$</span> Terminal cleared
+                </div>
+                <div class="terminal-line"></div>
+            `;
+        }
     }
 
-    // Notifications
-    showNotification(message) {
+    // Notification
+    showNotification(message, type = 'info') {
         const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.innerHTML = `<span class="notification-icon">ℹ️</span><span>${message}</span>`;
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <span class="notification-icon">${type === 'success' ? '✅' : 'ℹ️'}</span>
+            <span class="notification-message">${message}</span>
+        `;
 
         document.body.appendChild(notification);
 
         notification.style.cssText = `
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            background: #2d2d2d;
-            color: #e0e0e0;
-            padding: 12px 20px;
-            border-radius: 10px;
+            bottom: 32px;
+            right: 32px;
+            background: ${type === 'success' ? 'rgba(40, 200, 64, 0.95)' : 'rgba(45, 45, 45, 0.95)'};
+            color: white;
+            padding: 14px 20px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 13px;
+            font-size: 14px;
             z-index: 10000;
-            animation: notificationSlide 0.3s ease-out;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         `;
 
+        // Auto-remove
         setTimeout(() => {
-            notification.style.animation = 'notificationFade 0.3s ease-in forwards';
+            notification.style.animation = 'fadeOut 0.3s ease-in forwards';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
+
+    startMonitoring() {
+        // Already handled by startStatusUpdates
+    }
 }
 
+// Add notification animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+    @keyframes fadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
 // Initialize app
-const app = new AdminApp();
+const app = new DashboardApp();
 window.app = app;

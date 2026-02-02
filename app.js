@@ -772,15 +772,10 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
                     <span class="report-task-label">Current Task</span>
                     <span class="report-task-text">${report.currentTask}</span>
                 </div>
-                ${report.findings && report.findings.length > 0 ? `
-                    <div class="report-findings">
-                        <span class="report-findings-label">Findings</span>
-                        ${report.findings.slice(0, 3).map(f => `
-                            <div class="report-finding ${f.type}">
-                                <span class="finding-type">${this.getFindingIcon(f.type)}</span>
-                                <span class="finding-text">${f.content.substring(0, 100)}${f.content.length > 100 ? '...' : ''}</span>
-                            </div>
-                        `).join('')}
+                ${report.report ? `
+                    <div class="report-section">
+                        <span class="report-section-label">Latest Report</span>
+                        <div class="report-content">${report.report}</div>
                     </div>
                 ` : ''}
                 ${report.recentNotes && report.recentNotes.length > 0 ? `

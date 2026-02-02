@@ -1415,6 +1415,28 @@ body {
     color: var(--text-primary);
 }
 
+.report-section {
+    background: var(--bg-primary);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+}
+
+.report-section-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.report-content {
+    font-size: 14px;
+    color: var(--text-primary);
+    line-height: 1.5;
+}
+
 .report-findings {
     margin-bottom: 16px;
 }

@@ -40,6 +40,10 @@
                     <span class="nav-icon">⚙️</span>
                     <span class="nav-label">Config</span>
                 </a>
+                <a href="#" class="nav-item" data-page="reports">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Reports</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -306,6 +310,44 @@
                                     </select>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports View -->
+                <div class="view" id="view-reports">
+                    <div class="view-header">
+                        <div>
+                            <h2>Agent Reports</h2>
+                            <p>What your agents are working on</p>
+                        </div>
+                        <div class="view-actions">
+                            <button class="btn btn-secondary" onclick="app.refreshReports()">🔄 Refresh</button>
+                        </div>
+                    </div>
+
+                    <!-- Agent Reports Grid -->
+                    <div class="reports-grid" id="reports-grid">
+                        <!-- Agent reports populated by JS -->
+                    </div>
+
+                    <!-- Activity Feed -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Recent Activity</h2>
+                        </div>
+                        <div class="reports-activity" id="reports-activity">
+                            <!-- Activity items populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Product Ideas -->
+                    <div class="section" id="ideas-section" style="display: none;">
+                        <div class="section-header">
+                            <h2>💡 Product Ideas</h2>
+                        </div>
+                        <div class="ideas-list" id="ideas-list">
+                            <!-- Ideas populated by JS -->
                         </div>
                     </div>
                 </div>

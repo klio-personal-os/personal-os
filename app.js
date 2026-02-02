@@ -109,7 +109,8 @@ class MissionControl {
             tasks: 'Task Board',
             memory: 'Memory & Context',
             activity: 'Activity Feed',
-            config: 'Configuration'
+            config: 'Configuration',
+            reports: 'Agent Reports'
         };
         document.querySelector('.page-title').textContent = titles[viewName] || 'Dashboard';
 
@@ -124,6 +125,8 @@ class MissionControl {
             this.renderActivity();
         } else if (viewName === 'config') {
             this.renderConfig();
+        } else if (viewName === 'reports') {
+            this.renderReports();
         }
     }
 
@@ -729,6 +732,118 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
 
     addCronJob() {
         this.showNotification('Add cron job functionality coming soon');
+    }
+
+    // Reports
+    async fetchReports() {
+        try {
+            const response = await fetch('/api/reports');
+            const data = await response.json();
+            return data;
+        } catch (err) {
+            console.error('Error fetching reports:', err);
+            return { reports: [], activities: [], ideas: [] };
+        }
+    }
+
+    async renderReports() {
+        const data = await this.fetchReports();
+        const grid = document.getElementById('reports-grid');
+        
+        if (!data.reports || data.reports.length === 0) {
+            grid.innerHTML = '<p style="color: var(--text-secondary); padding: 40px; text-align: center;">No agent reports available yet</p>';
+            return;
+        }
+        
+        grid.innerHTML = data.reports.map(report => `
+            <div class="report-card">
+                <div class="report-header">
+                    <span class="report-avatar">${report.agent.avatar}</span>
+                    <div class="report-info">
+                        <span class="report-name">${report.agent.name}</span>
+                        <span class="report-role">${report.agent.role}</span>
+                    </div>
+                    <span class="report-status ${report.status}">
+                        <span class="report-status-dot"></span>
+                        ${report.status}
+                    </span>
+                </div>
+                <div class="report-task">
+                    <span class="report-task-label">Current Task</span>
+                    <span class="report-task-text">${report.currentTask}</span>
+                </div>
+                ${report.findings && report.findings.length > 0 ? `
+                    <div class="report-findings">
+                        <span class="report-findings-label">Findings</span>
+                        ${report.findings.slice(0, 3).map(f => `
+                            <div class="report-finding ${f.type}">
+                                <span class="finding-type">${this.getFindingIcon(f.type)}</span>
+                                <span class="finding-text">${f.content.substring(0, 100)}${f.content.length > 100 ? '...' : ''}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                ${report.recentNotes && report.recentNotes.length > 0 ? `
+                    <div class="report-notes">
+                        <span class="report-notes-label">Recent Notes</span>
+                        ${report.recentNotes.map(n => `
+                            <div class="report-note">
+                                <span class="note-file">📄 ${n.file}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+        
+        // Render activity feed
+        const activityContainer = document.getElementById('reports-activity');
+        if (data.activities && data.activities.length > 0) {
+            activityContainer.innerHTML = data.activities.map(act => `
+                <div class="activity-item">
+                    <span class="activity-avatar">${act.agentAvatar || '🤖'}</span>
+                    <div class="activity-content">
+                        <span class="activity-text"><strong>${act.agent}</strong> ${act.action}</span>
+                    </div>
+                    <span class="activity-time">${act.time}</span>
+                </div>
+            `).join('');
+        } else {
+            activityContainer.innerHTML = '<p style="color: var(--text-secondary); padding: 20px; text-align: center;">No recent activity</p>';
+        }
+        
+        // Render product ideas
+        const ideasSection = document.getElementById('ideas-section');
+        const ideasList = document.getElementById('ideas-list');
+        if (data.ideas && data.ideas.length > 0) {
+            ideasSection.style.display = 'block';
+            ideasList.innerHTML = data.ideas.map(idea => `
+                <div class="idea-item">
+                    <span class="idea-icon">💡</span>
+                    <span class="idea-text">${idea.text}</span>
+                    <span class="idea-source">${idea.source}</span>
+                </div>
+            `).join('');
+        } else {
+            ideasSection.style.display = 'none';
+        }
+    }
+
+    getFindingIcon(type) {
+        const icons = {
+            idea: '💡',
+            research: '🔍',
+            content: '📝',
+            code: '💻',
+            issue: '⚠️'
+        };
+        return icons[type] || '📌';
+    }
+
+    async refreshReports() {
+        this.showNotification('Refreshing reports...', 'info');
+        await this.renderReports();
+        this.showNotification('Reports updated', 'success');
     }
 
     // Utility

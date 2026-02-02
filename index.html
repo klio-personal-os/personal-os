@@ -3,108 +3,424 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal OS</title>
+    <title>Klio Admin - Dashboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Menu Bar -->
-    <div class="menu-bar">
-        <div class="menu-left">
-            <span class="apple-logo"></span>
-            <span class="menu-item" data-menu="personal">Personal</span>
-            <span class="menu-item" data-menu="file">File</span>
-            <span class="menu-item" data-menu="edit">Edit</span>
-            <span class="menu-item" data-menu="view">View</span>
-            <span class="menu-item" data-menu="window">Window</span>
-            <span class="menu-item" data-menu="help">Help</span>
-        </div>
-        <div class="menu-right">
-            <span class="status-icon" id="battery">🔋</span>
-            <span class="status-icon" id="wifi">📶</span>
-            <span class="status-icon" id="search">🔍</span>
-            <span class="status-icon" id="control">⚙️</span>
-            <span id="clock"></span>
-        </div>
-    </div>
+    <div class="app-container">
+        <!-- Left Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">⚙️</div>
+                <h1 class="logo-text">Klio Admin</h1>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">🏠</span>
+                    <span class="nav-label">Home</span>
+                </a>
+                <a href="#" class="nav-item" data-page="skills">
+                    <span class="nav-icon">🧠</span>
+                    <span class="nav-label">Skills</span>
+                </a>
+                <a href="#" class="nav-item" data-page="services">
+                    <span class="nav-icon">🔧</span>
+                    <span class="nav-label">Services</span>
+                </a>
+                <a href="#" class="nav-item" data-page="monitor">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Monitor</span>
+                </a>
+                <a href="#" class="nav-item" data-page="terminal">
+                    <span class="nav-icon">⬛</span>
+                    <span class="nav-label">Terminal</span>
+                </a>
+                <div class="nav-divider"></div>
+                <a href="#" class="nav-item" data-page="settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-label">Settings</span>
+                </a>
+            </nav>
 
-    <!-- Desktop -->
-    <div class="desktop">
-        <!-- Desktop Icons -->
-        <div class="desktop-icon" data-app="admin">
-            <div class="icon-app">⚙️</div>
-            <span>Admin</span>
-        </div>
-        <div class="desktop-icon" data-app="skills">
-            <div class="icon-folder">🧠</div>
-            <span>Skills</span>
-        </div>
-        <div class="desktop-icon" data-app="services">
-            <div class="icon-app">🔧</div>
-            <span>Services</span>
-        </div>
-        <div class="desktop-icon" data-app="monitor">
-            <div class="icon-app">📊</div>
-            <span>Monitor</span>
-        </div>
-        <div class="desktop-icon" data-app="github">
-            <div class="icon-app">🐙</div>
-            <span>GitHub</span>
-        </div>
-        <div class="desktop-icon" data-app="terminal">
-            <div class="icon-app">⬛</div>
-            <span>Terminal</span>
-        </div>
-    </div>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">🦁</div>
+                    <div class="user-details">
+                        <span class="user-name">Clawdbot</span>
+                        <span class="user-status online">● Online</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-    <!-- Windows Container -->
-    <div class="windows-container"></div>
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Header -->
+            <header class="top-header">
+                <div class="header-left">
+                    <h1 class="page-title">Dashboard</h1>
+                </div>
+                <div class="header-right">
+                    <span class="system-status">
+                        <span class="status-dot active"></span>
+                        <span class="status-text">System Online</span>
+                    </span>
+                    <span class="clock" id="clock"></span>
+                </div>
+            </header>
 
-    <!-- Dock -->
-    <div class="dock">
-        <div class="dock-item" data-app="admin">
-            <div class="dock-icon">⚙️</div>
-            <span class="dock-tooltip">Admin Dashboard</span>
-        </div>
-        <div class="dock-item" data-app="skills">
-            <div class="dock-icon">🧠</div>
-            <span class="dock-tooltip">Skills Manager</span>
-        </div>
-        <div class="dock-item" data-app="services">
-            <div class="dock-icon">🔧</div>
-            <span class="dock-tooltip">Services</span>
-        </div>
-        <div class="dock-item" data-app="monitor">
-            <div class="dock-icon">📊</div>
-            <span class="dock-tooltip">System Monitor</span>
-        </div>
-        <div class="dock-divider"></div>
-        <div class="dock-item" data-app="terminal">
-            <div class="dock-icon">⬛</div>
-            <span class="dock-tooltip">Terminal</span>
-        </div>
-        <div class="dock-item" data-app="github">
-            <div class="dock-icon">🐙</div>
-            <span class="dock-tooltip">GitHub</span>
-        </div>
-        <div class="dock-divider"></div>
-        <div class="dock-item" data-app="trash">
-            <div class="dock-icon">🗑️</div>
-            <span class="dock-tooltip">Trash</span>
-        </div>
-    </div>
+            <!-- Page Content -->
+            <div class="content-area">
+                <!-- Dashboard / Home Page -->
+                <div class="view active" id="view-dashboard">
+                    <div class="welcome-section">
+                        <h2>Welcome back</h2>
+                        <p>Here's what's happening with your system today.</p>
+                    </div>
 
-    <!-- Context Menu -->
-    <div class="context-menu" id="contextMenu">
-        <div class="menu-option">New Folder</div>
-        <div class="menu-option">Get Info</div>
-        <div class="menu-divider"></div>
-        <div class="menu-option">Change Desktop Background...</div>
-        <div class="menu-divider"></div>
-        <div class="menu-option">Use Stacks</div>
-        <div class="menu-option">Sort By</div>
-        <div class="menu-option">Clean Up</div>
-        <div class="menu-divider"></div>
-        <div class="menu-option">Show View Options</div>
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🖥️</div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-cpu">--</span>
+                                <span class="stat-label">CPU (%)</span>
+                            </div>
+                            <div class="stat-sparkline">
+                                <svg viewBox="0 0 60 20" class="mini-chart" id="cpu-sparkline"></svg>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🧠</div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-memory">--</span>
+                                <span class="stat-label">Memory (GB)</span>
+                            </div>
+                            <div class="stat-sparkline">
+                                <svg viewBox="0 0 60 20" class="mini-chart" id="memory-sparkline"></svg>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-storage">--</span>
+                                <span class="stat-label">Storage (%)</span>
+                            </div>
+                            <div class="stat-sparkline">
+                                <svg viewBox="0 0 60 20" class="mini-chart" id="storage-sparkline"></svg>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-info">
+                                <span class="stat-value" id="stat-uptime">--</span>
+                                <span class="stat-label">Uptime</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Cards Row -->
+                    <div class="cards-row">
+                        <!-- Active Sessions Card -->
+                        <div class="card sessions-card">
+                            <div class="card-header">
+                                <h3>Active Sessions</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="session-list" id="session-list">
+                                    <div class="session-item">
+                                        <span class="session-icon">🌐</span>
+                                        <div class="session-info">
+                                            <span class="session-name">Main Session</span>
+                                            <span class="session-meta">Direct chat with human</span>
+                                        </div>
+                                        <span class="session-badge active">Active</span>
+                                    </div>
+                                    <div class="session-item">
+                                        <span class="session-icon">🤖</span>
+                                        <div class="session-info">
+                                            <span class="session-name">Sub-agent Session</span>
+                                            <span class="session-meta">Background task processing</span>
+                                        </div>
+                                        <span class="session-badge active">Active</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Card -->
+                        <div class="card activity-card">
+                            <div class="card-header">
+                                <h3>Recent Activity</h3>
+                                <button class="card-action" onclick="app.refreshActivity()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="card-content">
+                                <div class="activity-list" id="activity-list">
+                                    <div class="activity-item">
+                                        <span class="activity-icon">🧠</span>
+                                        <span class="activity-text">Memory updated</span>
+                                        <span class="activity-time">2m ago</span>
+                                    </div>
+                                    <div class="activity-item">
+                                        <span class="activity-icon">🐙</span>
+                                        <span class="activity-text">GitHub sync completed</span>
+                                        <span class="activity-time">15m ago</span>
+                                    </div>
+                                    <div class="activity-item">
+                                        <span class="activity-icon">💬</span>
+                                        <span class="activity-text">Slack notification sent</span>
+                                        <span class="activity-time">32m ago</span>
+                                    </div>
+                                    <div class="activity-item">
+                                        <span class="activity-icon">🔧</span>
+                                        <span class="activity-text">Service health check passed</span>
+                                        <span class="activity-time">1h ago</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Skills Page -->
+                <div class="view" id="view-skills">
+                    <div class="view-header">
+                        <div>
+                            <h2>Skills</h2>
+                            <p>Manage Clawdbot's capabilities and integrations</p>
+                        </div>
+                        <div class="view-actions">
+                            <button class="btn btn-secondary" onclick="app.refreshSkills()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                                </svg>
+                                Refresh
+                            </button>
+                            <button class="btn btn-primary" onclick="app.startAllSkills()">▶️ Start All</button>
+                            <button class="btn btn-danger" onclick="app.stopAllSkills()">⏹️ Stop All</button>
+                        </div>
+                    </div>
+
+                    <div class="skills-grid" id="skills-grid">
+                        <!-- Skills populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Services Page -->
+                <div class="view" id="view-services">
+                    <div class="view-header">
+                        <div>
+                            <h2>Services</h2>
+                            <p>Control clawdbot backend services</p>
+                        </div>
+                        <div class="view-actions">
+                            <button class="btn btn-primary" onclick="app.startAllServices()">▶️ Start All</button>
+                            <button class="btn btn-danger" onclick="app.stopAllServices()">⏹️ Stop All</button>
+                            <button class="btn btn-secondary" onclick="app.restartAllServices()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                                </svg>
+                                Restart All
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="services-list" id="services-list">
+                        <!-- Services populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Monitor Page -->
+                <div class="view" id="view-monitor">
+                    <div class="view-header">
+                        <div>
+                            <h2>System Monitor</h2>
+                            <p>Real-time system performance metrics</p>
+                        </div>
+                        <div class="view-actions">
+                            <button class="btn btn-secondary" id="monitor-toggle" onclick="app.toggleMonitoring()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="6" y="4" width="4" height="16"/>
+                                    <rect x="14" y="4" width="4" height="16"/>
+                                </svg>
+                                <span id="monitor-toggle-text">Pause</span>
+                            </button>
+                            <button class="btn btn-secondary" onclick="app.refreshMonitor()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M23 4v6h-6M1 20v-6h6"/>
+                                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                                </svg>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="monitor-grid">
+                        <div class="monitor-card">
+                            <div class="monitor-header">
+                                <span class="monitor-icon">🖥️</span>
+                                <span class="monitor-title">CPU Usage</span>
+                            </div>
+                            <div class="monitor-value">
+                                <span class="value" id="monitor-cpu">--</span>
+                                <span class="unit">%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="bar-fill cpu" id="monitor-cpu-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="monitor-card">
+                            <div class="monitor-header">
+                                <span class="monitor-icon">🧠</span>
+                                <span class="monitor-title">Memory</span>
+                            </div>
+                            <div class="monitor-value">
+                                <span class="value" id="monitor-memory">--</span>
+                                <span class="unit">GB</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="bar-fill memory" id="monitor-memory-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="monitor-card">
+                            <div class="monitor-header">
+                                <span class="monitor-icon">💾</span>
+                                <span class="monitor-title">Storage</span>
+                            </div>
+                            <div class="monitor-value">
+                                <span class="value" id="monitor-storage">--</span>
+                                <span class="unit">%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="bar-fill storage" id="monitor-storage-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="monitor-card">
+                            <div class="monitor-header">
+                                <span class="monitor-icon">🌐</span>
+                                <span class="monitor-title">Network</span>
+                            </div>
+                            <div class="monitor-value">
+                                <span class="value" id="monitor-network">↓ --</span>
+                                <span class="unit">MB/s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Performance History</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="chart-container" id="performance-chart">
+                                <svg viewBox="0 0 400 100" class="chart-svg">
+                                    <defs>
+                                        <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                            <stop offset="0%" style="stop-color:#007AFF;stop-opacity:0.3"/>
+                                            <stop offset="100%" style="stop-color:#007AFF;stop-opacity:0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <path id="chart-area" d="" fill="url(#chartGradient)"/>
+                                    <path id="chart-line" d="" fill="none" stroke="#007AFF" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Page -->
+                <div class="view" id="view-terminal">
+                    <div class="view-header">
+                        <div>
+                            <h2>Terminal</h2>
+                            <p>Execute commands and manage the system</p>
+                        </div>
+                        <div class="view-actions">
+                            <button class="btn btn-secondary" onclick="app.clearTerminal()">🧹 Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="terminal-container">
+                        <div class="terminal-output" id="terminal-output">
+                            <div class="terminal-line info">
+                                <span class="terminal-prompt">$</span> Welcome to Clawdbot Terminal v1.0
+                            </div>
+                            <div class="terminal-line info">
+                                <span class="terminal-prompt">$</span> Type 'help' for available commands
+                            </div>
+                            <div class="terminal-line"></div>
+                        </div>
+                        <div class="terminal-input-wrapper">
+                            <span class="terminal-prompt">$</span>
+                            <input type="text" id="terminal-input" class="terminal-input" placeholder="Enter command..." autofocus>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Page -->
+                <div class="view" id="view-settings">
+                    <div class="view-header">
+                        <div>
+                            <h2>Settings</h2>
+                            <p>Configure your admin dashboard preferences</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Appearance</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Dark Mode</span>
+                                <span class="setting-desc">Always use dark theme</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" checked disabled>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>Notifications</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Activity Alerts</span>
+                                <span class="setting-desc">Get notified of important system events</span>
+                            </div>
+                            <div class="setting-control">
+                                <label class="toggle">
+                                    <input type="checkbox" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>About</h3>
+                        <div class="setting-item">
+                            <div class="setting-info">
+                                <span class="setting-label">Version</span>
+                                <span class="setting-desc">Clawdbot Admin v1.0.0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script src="app.js"></script>

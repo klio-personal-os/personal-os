@@ -139,10 +139,6 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: Date.now() });
 });
 
-// Agents API
-const agentsApi = require('./api/agents');
-app.get(agentsApi.path, agentsApi.handler);
-
 // Main route - serve the app
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

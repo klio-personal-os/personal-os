@@ -96,8 +96,8 @@ function getLastHeartbeat(agentId) {
     return new Date().toISOString().split('T')[0];
 }
 
-// API endpoint: Get all agents status
-function getAgents(req, res) {
+// Vercel serverless function handler
+module.exports = (req, res) => {
     const agentsData = AGENTS.map(agent => {
         const workingMdPath = path.join(AGENTS_PATH, agent.id, 'memory', 'WORKING.md');
         
@@ -111,15 +111,10 @@ function getAgents(req, res) {
         };
     });
     
-    res.json({
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json({
         success: true,
         agents: agentsData,
         timestamp: new Date().toISOString()
     });
-}
-
-// Export route handler
-module.exports = {
-    path: '/api/agents',
-    handler: getAgents
 };

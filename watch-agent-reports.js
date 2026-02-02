@@ -9,8 +9,9 @@ const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
 
-const AGENTS_PATH = '/home/ben/clawd/agents';
+const CLAWD_AGENTS_PATH = '/home/ben/clawd/agents';
 const REPORTS_PATH = '/home/ben/personal-os/reports/agent-reports.json';
+const HOURLY_REPORT_PATH = '/home/ben/personal-os/reports/hourly-report.md';
 const POLL_INTERVAL = 60000; // Check every 60 seconds
 
 const AGENTS = [
@@ -99,19 +100,29 @@ function parseWorkingMd(content) {
 // Update the reports JSON
 function updateReports() {
     let data = { agents: {}, lastUpdated: null };
+    let agentReports = [];
     
+    // Try to read agent reports from clawd (new format)
+    const clawdReportsPath = path.join(CLAWD_AGENTS_PATH, 'agent-reports.json');
     try {
-        if (fs.existsSync(REPORTS_PATH)) {
-            data = JSON.parse(fs.readFileSync(REPORTS_PATH, 'utf-8'));
+        if (fs.existsSync(clawdReportsPath)) {
+            const raw = fs.readFileSync(clawdReportsPath, 'utf-8');
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                agentReports = parsed;
+            } else if (parsed.reports && Array.isArray(parsed.reports)) {
+                agentReports = parsed.reports;
+            }
         }
     } catch (err) {
-        // File doesn't exist or is invalid
+        // Ignore
     }
     
+    // Also check WORKING.md files for status
     let hasChanges = false;
     
     for (const agent of AGENTS) {
-        const workingMdPath = path.join(AGENTS_PATH, agent.id, 'memory', 'WORKING.md');
+        const workingMdPath = path.join(CLAWD_AGENTS_PATH, agent.id, 'memory', 'WORKING.md');
         
         try {
             if (fs.existsSync(workingMdPath)) {
@@ -119,7 +130,6 @@ function updateReports() {
                 const contentHash = hash(content);
                 
                 if (lastHashes[agent.id] !== contentHash) {
-                    // Content changed, update report
                     lastHashes[agent.id] = contentHash;
                     const { status, currentTask, report } = parseWorkingMd(content);
                     
@@ -147,18 +157,52 @@ function updateReports() {
         }
     }
     
-    if (hasChanges) {
+    // Also add latest agent report data
+    if (agentReports.length > 0) {
+        // Get last report per agent
+        const byAgent = {};
+        for (const r of agentReports) {
+            if (!byAgent[r.agent] || new Date(r.timestamp) > new Date(byAgent[r.agent].timestamp)) {
+                byAgent[r.agent] = r;
+            }
+        }
+        
+        for (const [agentId, report] of Object.entries(byAgent)) {
+            if (data.agents[agentId]) {
+                data.agents[agentId].report = report.accomplished;
+                data.agents[agentId].currentTask = report.task;
+                data.agents[agentId].blocking = report.blocking;
+            }
+        }
+    }
+    
+    if (hasChanges || agentReports.length > 0) {
         data.lastUpdated = new Date().toISOString();
         fs.writeFileSync(REPORTS_PATH, JSON.stringify(data, null, 2));
-        console.log('✅ Reports updated, pushing to GitHub...');
+        console.log('✅ Reports updated');
         
+        // Generate hourly report
         try {
-            execSync('git add reports/agent-reports.json', { cwd: '/home/ben/personal-os' });
-            execSync('git commit -m "Update agent reports"', { cwd: '/home/ben/personal-os' });
+            const { execSync } = require('child_process');
+            execSync('node generate-hourly-report.js', { cwd: '/home/ben/personal-os' });
+            console.log('📊 Hourly report generated');
+            
+            // Copy to Vercel reports folder
+            if (fs.existsSync(HOURLY_REPORT_PATH)) {
+                // Hourly report already saved
+            }
+        } catch (err) {
+            console.log('⚠️  Hourly report generation:', err.message);
+        }
+        
+        console.log('🚀 Pushing to GitHub...');
+        try {
+            execSync('git add -A', { cwd: '/home/ben/personal-os' });
+            execSync('git commit -m "Update agent reports and hourly summary"', { cwd: '/home/ben/personal-os' });
             execSync('git push origin main', { cwd: '/home/ben/personal-os' });
             console.log('✅ Pushed to GitHub');
         } catch (err) {
-            console.error('⚠️  Failed to push:', err.message);
+            console.log('⚠️  Push:', err.message);
         }
     }
 }

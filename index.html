@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Klio Admin - Dashboard</title>
+    <title>Mission Control - Multi-Agent Dashboard</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,35 +11,34 @@
         <!-- Left Sidebar Navigation -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="logo-icon">⚙️</div>
-                <h1 class="logo-text">Klio Admin</h1>
+                <div class="logo-icon">🎯</div>
+                <h1 class="logo-text">Mission Control</h1>
             </div>
             
             <nav class="sidebar-nav">
                 <a href="#" class="nav-item active" data-page="dashboard">
-                    <span class="nav-icon">🏠</span>
-                    <span class="nav-label">Home</span>
-                </a>
-                <a href="#" class="nav-item" data-page="skills">
-                    <span class="nav-icon">🧠</span>
-                    <span class="nav-label">Skills</span>
-                </a>
-                <a href="#" class="nav-item" data-page="services">
-                    <span class="nav-icon">🔧</span>
-                    <span class="nav-label">Services</span>
-                </a>
-                <a href="#" class="nav-item" data-page="monitor">
                     <span class="nav-icon">📊</span>
-                    <span class="nav-label">Monitor</span>
+                    <span class="nav-label">Dashboard</span>
                 </a>
-                <a href="#" class="nav-item" data-page="terminal">
-                    <span class="nav-icon">⬛</span>
-                    <span class="nav-label">Terminal</span>
+                <a href="#" class="nav-item" data-page="agents">
+                    <span class="nav-icon">🤖</span>
+                    <span class="nav-label">Agents</span>
                 </a>
-                <div class="nav-divider"></div>
-                <a href="#" class="nav-item" data-page="settings">
+                <a href="#" class="nav-item" data-page="tasks">
+                    <span class="nav-icon">📋</span>
+                    <span class="nav-label">Tasks</span>
+                </a>
+                <a href="#" class="nav-item" data-page="memory">
+                    <span class="nav-icon">🧠</span>
+                    <span class="nav-label">Memory</span>
+                </a>
+                <a href="#" class="nav-item" data-page="activity">
+                    <span class="nav-icon">📡</span>
+                    <span class="nav-label">Activity</span>
+                </a>
+                <a href="#" class="nav-item" data-page="config">
                     <span class="nav-icon">⚙️</span>
-                    <span class="nav-label">Settings</span>
+                    <span class="nav-label">Config</span>
                 </a>
             </nav>
 
@@ -48,7 +47,7 @@
                     <div class="user-avatar">🦁</div>
                     <div class="user-details">
                         <span class="user-name">Clawdbot</span>
-                        <span class="user-status online">● Online</span>
+                        <span class="user-status online">● <span id="agent-count">0</span> agents</span>
                     </div>
                 </div>
             </div>
@@ -59,7 +58,7 @@
             <!-- Top Header -->
             <header class="top-header">
                 <div class="header-left">
-                    <h1 class="page-title">Dashboard</h1>
+                    <h1 class="page-title" id="page-title">Dashboard</h1>
                 </div>
                 <div class="header-right">
                     <span class="system-status">
@@ -70,357 +69,340 @@
                 </div>
             </header>
 
-            <!-- Page Content -->
+            <!-- Content Area -->
             <div class="content-area">
-                <!-- Dashboard / Home Page -->
+                <!-- Dashboard View -->
                 <div class="view active" id="view-dashboard">
-                    <div class="welcome-section">
-                        <h2>Welcome back</h2>
-                        <p>Here's what's happening with your system today.</p>
-                    </div>
-
-                    <!-- Stats Cards -->
+                    <!-- Stats Overview -->
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-icon">🖥️</div>
+                            <div class="stat-icon">🤖</div>
                             <div class="stat-info">
-                                <span class="stat-value" id="stat-cpu">--</span>
-                                <span class="stat-label">CPU (%)</span>
-                            </div>
-                            <div class="stat-sparkline">
-                                <svg viewBox="0 0 60 20" class="mini-chart" id="cpu-sparkline"></svg>
+                                <span class="stat-value" id="total-agents">--</span>
+                                <span class="stat-label">Total Agents</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">🧠</div>
+                            <div class="stat-icon">✅</div>
                             <div class="stat-info">
-                                <span class="stat-value" id="stat-memory">--</span>
-                                <span class="stat-label">Memory (GB)</span>
-                            </div>
-                            <div class="stat-sparkline">
-                                <svg viewBox="0 0 60 20" class="mini-chart" id="memory-sparkline"></svg>
+                                <span class="stat-value" id="active-agents">--</span>
+                                <span class="stat-label">Active</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">💾</div>
+                            <div class="stat-icon">📋</div>
                             <div class="stat-info">
-                                <span class="stat-value" id="stat-storage">--</span>
-                                <span class="stat-label">Storage (%)</span>
-                            </div>
-                            <div class="stat-sparkline">
-                                <svg viewBox="0 0 60 20" class="mini-chart" id="storage-sparkline"></svg>
+                                <span class="stat-value" id="total-tasks">--</span>
+                                <span class="stat-label">Tasks</span>
                             </div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">⏱️</div>
+                            <div class="stat-icon">⚡</div>
                             <div class="stat-info">
-                                <span class="stat-value" id="stat-uptime">--</span>
-                                <span class="stat-label">Uptime</span>
+                                <span class="stat-value" id="pending-tasks">--</span>
+                                <span class="stat-label">In Progress</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Main Cards Row -->
-                    <div class="cards-row">
-                        <!-- Active Sessions Card -->
-                        <div class="card sessions-card">
-                            <div class="card-header">
-                                <h3>Active Sessions</h3>
-                            </div>
-                            <div class="card-content">
-                                <div class="session-list" id="session-list">
-                                    <div class="session-item">
-                                        <span class="session-icon">🌐</span>
-                                        <div class="session-info">
-                                            <span class="session-name">Main Session</span>
-                                            <span class="session-meta">Direct chat with human</span>
-                                        </div>
-                                        <span class="session-badge active">Active</span>
-                                    </div>
-                                    <div class="session-item">
-                                        <span class="session-icon">🤖</span>
-                                        <div class="session-info">
-                                            <span class="session-name">Sub-agent Session</span>
-                                            <span class="session-meta">Background task processing</span>
-                                        </div>
-                                        <span class="session-badge active">Active</span>
-                                    </div>
-                                </div>
-                            </div>
+                    <!-- Agent Grid Overview -->
+                    <div class="section">
+                        <div class="section-header">
+                            <h2>Agent Team</h2>
+                            <button class="btn btn-secondary" onclick="app.navigateTo('agents')">View All →</button>
                         </div>
+                        <div class="agents-quick-grid" id="agents-quick-grid">
+                            <!-- Agent cards populated by JS -->
+                        </div>
+                    </div>
 
-                        <!-- Recent Activity Card -->
-                        <div class="card activity-card">
+                    <!-- Activity & Tasks Row -->
+                    <div class="cards-row">
+                        <!-- Recent Activity -->
+                        <div class="card">
                             <div class="card-header">
                                 <h3>Recent Activity</h3>
-                                <button class="card-action" onclick="app.refreshActivity()">
+                                <button class="card-action" onclick="app.navigateTo('activity')">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <path d="M23 4v6h-6M1 20v-6h6"/>
-                                        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
                                     </svg>
                                 </button>
                             </div>
                             <div class="card-content">
-                                <div class="activity-list" id="activity-list">
-                                    <div class="activity-item">
-                                        <span class="activity-icon">🧠</span>
-                                        <span class="activity-text">Memory updated</span>
-                                        <span class="activity-time">2m ago</span>
-                                    </div>
-                                    <div class="activity-item">
-                                        <span class="activity-icon">🐙</span>
-                                        <span class="activity-text">GitHub sync completed</span>
-                                        <span class="activity-time">15m ago</span>
-                                    </div>
-                                    <div class="activity-item">
-                                        <span class="activity-icon">💬</span>
-                                        <span class="activity-text">Slack notification sent</span>
-                                        <span class="activity-time">32m ago</span>
-                                    </div>
-                                    <div class="activity-item">
-                                        <span class="activity-icon">🔧</span>
-                                        <span class="activity-text">Service health check passed</span>
-                                        <span class="activity-time">1h ago</span>
-                                    </div>
+                                <div class="activity-feed" id="dashboard-activity">
+                                    <!-- Activity items populated by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inbox Tasks -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h3>Inbox</h3>
+                                <button class="btn btn-primary btn-sm" onclick="app.showTaskModal()">+ New Task</button>
+                            </div>
+                            <div class="card-content">
+                                <div class="inbox-tasks" id="inbox-preview">
+                                    <!-- Inbox tasks populated by JS -->
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Skills Page -->
-                <div class="view" id="view-skills">
+                <!-- Agents View -->
+                <div class="view" id="view-agents">
                     <div class="view-header">
                         <div>
-                            <h2>Skills</h2>
-                            <p>Manage Clawdbot's capabilities and integrations</p>
+                            <h2>Agent Management</h2>
+                            <p>Control and configure your agent team</p>
                         </div>
                         <div class="view-actions">
-                            <button class="btn btn-secondary" onclick="app.refreshSkills()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M23 4v6h-6M1 20v-6h6"/>
-                                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                                </svg>
-                                Refresh
-                            </button>
-                            <button class="btn btn-primary" onclick="app.startAllSkills()">▶️ Start All</button>
-                            <button class="btn btn-danger" onclick="app.stopAllSkills()">⏹️ Stop All</button>
+                            <button class="btn btn-primary" onclick="app.startAllAgents()">▶️ Start All</button>
+                            <button class="btn btn-danger" onclick="app.stopAllAgents()">⏹️ Stop All</button>
                         </div>
                     </div>
 
-                    <div class="skills-grid" id="skills-grid">
-                        <!-- Skills populated by JS -->
+                    <div class="agents-grid" id="agents-grid">
+                        <!-- Agent cards populated by JS -->
                     </div>
                 </div>
 
-                <!-- Services Page -->
-                <div class="view" id="view-services">
+                <!-- Tasks View (Kanban) -->
+                <div class="view" id="view-tasks">
                     <div class="view-header">
                         <div>
-                            <h2>Services</h2>
-                            <p>Control clawdbot backend services</p>
+                            <h2>Task Board</h2>
+                            <p>Manage and track agent tasks</p>
                         </div>
                         <div class="view-actions">
-                            <button class="btn btn-primary" onclick="app.startAllServices()">▶️ Start All</button>
-                            <button class="btn btn-danger" onclick="app.stopAllServices()">⏹️ Stop All</button>
-                            <button class="btn btn-secondary" onclick="app.restartAllServices()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M23 4v6h-6M1 20v-6h6"/>
-                                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                                </svg>
-                                Restart All
-                            </button>
+                            <button class="btn btn-primary" onclick="app.showTaskModal()">+ New Task</button>
                         </div>
                     </div>
 
-                    <div class="services-list" id="services-list">
-                        <!-- Services populated by JS -->
+                    <div class="kanban-board" id="kanban-board">
+                        <!-- Kanban columns populated by JS -->
                     </div>
                 </div>
 
-                <!-- Monitor Page -->
-                <div class="view" id="view-monitor">
+                <!-- Memory View -->
+                <div class="view" id="view-memory">
                     <div class="view-header">
                         <div>
-                            <h2>System Monitor</h2>
-                            <p>Real-time system performance metrics</p>
+                            <h2>Memory & Context</h2>
+                            <p>View and edit agent memories and context</p>
                         </div>
                         <div class="view-actions">
-                            <button class="btn btn-secondary" id="monitor-toggle" onclick="app.toggleMonitoring()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="6" y="4" width="4" height="16"/>
-                                    <rect x="14" y="4" width="4" height="16"/>
-                                </svg>
-                                <span id="monitor-toggle-text">Pause</span>
-                            </button>
-                            <button class="btn btn-secondary" onclick="app.refreshMonitor()">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M23 4v6h-6M1 20v-6h6"/>
-                                    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                                </svg>
-                                Refresh
-                            </button>
+                            <button class="btn btn-secondary" onclick="app.refreshMemory()">🔄 Refresh</button>
                         </div>
                     </div>
 
-                    <div class="monitor-grid">
-                        <div class="monitor-card">
-                            <div class="monitor-header">
-                                <span class="monitor-icon">🖥️</span>
-                                <span class="monitor-title">CPU Usage</span>
-                            </div>
-                            <div class="monitor-value">
-                                <span class="value" id="monitor-cpu">--</span>
-                                <span class="unit">%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="bar-fill cpu" id="monitor-cpu-bar" style="width: 0%"></div>
+                    <div class="memory-grid">
+                        <!-- Working.md Files -->
+                        <div class="memory-section">
+                            <h3>📝 Working Memory</h3>
+                            <div class="memory-files" id="working-files">
+                                <!-- Files populated by JS -->
                             </div>
                         </div>
 
-                        <div class="monitor-card">
-                            <div class="monitor-header">
-                                <span class="monitor-icon">🧠</span>
-                                <span class="monitor-title">Memory</span>
-                            </div>
-                            <div class="monitor-value">
-                                <span class="value" id="monitor-memory">--</span>
-                                <span class="unit">GB</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="bar-fill memory" id="monitor-memory-bar" style="width: 0%"></div>
+                        <!-- Daily Notes -->
+                        <div class="memory-section">
+                            <h3>📅 Daily Notes</h3>
+                            <div class="memory-files" id="daily-notes">
+                                <!-- Notes populated by JS -->
                             </div>
                         </div>
 
-                        <div class="monitor-card">
-                            <div class="monitor-header">
-                                <span class="monitor-icon">💾</span>
-                                <span class="monitor-title">Storage</span>
-                            </div>
-                            <div class="monitor-value">
-                                <span class="value" id="monitor-storage">--</span>
-                                <span class="unit">%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="bar-fill storage" id="monitor-storage-bar" style="width: 0%"></div>
+                        <!-- Long-term Memory -->
+                        <div class="memory-section">
+                            <h3>🧠 Long-term Memory</h3>
+                            <div class="memory-file-card" onclick="app.openMemoryFile('MEMORY.md')">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">MEMORY.md</span>
                             </div>
                         </div>
 
-                        <div class="monitor-card">
-                            <div class="monitor-header">
-                                <span class="monitor-icon">🌐</span>
-                                <span class="monitor-title">Network</span>
-                            </div>
-                            <div class="monitor-value">
-                                <span class="value" id="monitor-network">↓ --</span>
-                                <span class="unit">MB/s</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>Performance History</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="chart-container" id="performance-chart">
-                                <svg viewBox="0 0 400 100" class="chart-svg">
-                                    <defs>
-                                        <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" style="stop-color:#007AFF;stop-opacity:0.3"/>
-                                            <stop offset="100%" style="stop-color:#007AFF;stop-opacity:0"/>
-                                        </linearGradient>
-                                    </defs>
-                                    <path id="chart-area" d="" fill="url(#chartGradient)"/>
-                                    <path id="chart-line" d="" fill="none" stroke="#007AFF" stroke-width="2"/>
-                                </svg>
+                        <!-- Configuration -->
+                        <div class="memory-section">
+                            <h3>⚙️ Configuration</h3>
+                            <div class="memory-files" id="config-files">
+                                <div class="memory-file-card" onclick="app.openMemoryFile('SOUL.md')">
+                                    <span class="file-icon">📄</span>
+                                    <span class="file-name">SOUL.md</span>
+                                </div>
+                                <div class="memory-file-card" onclick="app.openMemoryFile('AGENTS.md')">
+                                    <span class="file-icon">📄</span>
+                                    <span class="file-name">AGENTS.md</span>
+                                </div>
+                                <div class="memory-file-card" onclick="app.openMemoryFile('TOOLS.md')">
+                                    <span class="file-icon">📄</span>
+                                    <span class="file-name">TOOLS.md</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Terminal Page -->
-                <div class="view" id="view-terminal">
+                <!-- Activity View -->
+                <div class="view" id="view-activity">
                     <div class="view-header">
                         <div>
-                            <h2>Terminal</h2>
-                            <p>Execute commands and manage the system</p>
+                            <h2>Activity Feed</h2>
+                            <p>Real-time stream of agent activity</p>
                         </div>
                         <div class="view-actions">
-                            <button class="btn btn-secondary" onclick="app.clearTerminal()">🧹 Clear</button>
+                            <button class="btn btn-secondary" onclick="app.toggleActivityStream()">
+                                <span id="stream-toggle-text">⏸️ Pause</span>
+                            </button>
                         </div>
                     </div>
 
-                    <div class="terminal-container">
-                        <div class="terminal-output" id="terminal-output">
-                            <div class="terminal-line info">
-                                <span class="terminal-prompt">$</span> Welcome to Clawdbot Terminal v1.0
-                            </div>
-                            <div class="terminal-line info">
-                                <span class="terminal-prompt">$</span> Type 'help' for available commands
-                            </div>
-                            <div class="terminal-line"></div>
-                        </div>
-                        <div class="terminal-input-wrapper">
-                            <span class="terminal-prompt">$</span>
-                            <input type="text" id="terminal-input" class="terminal-input" placeholder="Enter command..." autofocus>
-                        </div>
+                    <div class="activity-stream" id="activity-stream">
+                        <!-- Activity items populated by JS -->
                     </div>
                 </div>
 
-                <!-- Settings Page -->
-                <div class="view" id="view-settings">
+                <!-- Config View -->
+                <div class="view" id="view-config">
                     <div class="view-header">
                         <div>
-                            <h2>Settings</h2>
-                            <p>Configure your admin dashboard preferences</p>
+                            <h2>Configuration</h2>
+                            <p>Manage agent schedules and settings</p>
                         </div>
                     </div>
 
-                    <div class="settings-section">
-                        <h3>Appearance</h3>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-label">Dark Mode</span>
-                                <span class="setting-desc">Always use dark theme</span>
+                    <div class="config-sections">
+                        <!-- Cron Schedules -->
+                        <div class="config-section">
+                            <h3>⏰ Cron Schedules</h3>
+                            <div class="cron-list" id="cron-list">
+                                <!-- Cron jobs populated by JS -->
                             </div>
-                            <div class="setting-control">
-                                <label class="toggle">
-                                    <input type="checkbox" checked disabled>
-                                    <span class="toggle-slider"></span>
-                                </label>
+                            <button class="btn btn-secondary" onclick="app.addCronJob()">+ Add Schedule</button>
+                        </div>
+
+                        <!-- Session Keys -->
+                        <div class="config-section">
+                            <h3>🔑 Session Keys</h3>
+                            <div class="session-keys" id="session-keys">
+                                <!-- Session keys populated by JS -->
                             </div>
                         </div>
-                    </div>
 
-                    <div class="settings-section">
-                        <h3>Notifications</h3>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-label">Activity Alerts</span>
-                                <span class="setting-desc">Get notified of important system events</span>
-                            </div>
-                            <div class="setting-control">
-                                <label class="toggle">
-                                    <input type="checkbox" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-section">
-                        <h3>About</h3>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <span class="setting-label">Version</span>
-                                <span class="setting-desc">Clawdbot Admin v1.0.0</span>
+                        <!-- Heartbeat Config -->
+                        <div class="config-section">
+                            <h3>💓 Heartbeat Settings</h3>
+                            <div class="setting-item">
+                                <div class="setting-info">
+                                    <span class="setting-label">Heartbeat Interval</span>
+                                    <span class="setting-desc">How often to check for updates</span>
+                                </div>
+                                <div class="setting-control">
+                                    <select class="setting-select">
+                                        <option value="15">15 minutes</option>
+                                        <option value="30" selected>30 minutes</option>
+                                        <option value="60">1 hour</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Task Modal -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Create New Task</h3>
+                <button class="modal-close" onclick="app.closeTaskModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Task Title</label>
+                    <input type="text" id="task-title" placeholder="Enter task title...">
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="task-description" placeholder="Task description..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Assign To</label>
+                    <select id="task-assignee">
+                        <option value="">Unassigned</option>
+                        <!-- Options populated by JS -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="task-priority">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="app.closeTaskModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="app.createTask()">Create Task</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Detail Modal -->
+    <div class="modal" id="agent-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="agent-modal-title">Agent Details</h3>
+                <button class="modal-close" onclick="app.closeAgentModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="agent-detail-grid">
+                    <div class="agent-info-section">
+                        <h4>Status</h4>
+                        <div class="agent-status-badge" id="agent-status-badge">Active</div>
+                        <div class="agent-current-task" id="agent-current-task">No task assigned</div>
+                    </div>
+                    <div class="agent-info-section">
+                        <h4>Session Key</h4>
+                        <code class="session-key-display" id="agent-session-key">agent:main:main</code>
+                    </div>
+                    <div class="agent-info-section">
+                        <h4>Quick Actions</h4>
+                        <div class="agent-actions">
+                            <button class="btn btn-primary btn-sm" id="agent-start-btn" onclick="app.toggleAgentStatus()">▶️ Start</button>
+                            <button class="btn btn-secondary btn-sm" onclick="app.viewAgentSoul()">📝 SOUL.md</button>
+                            <button class="btn btn-secondary btn-sm" onclick="app.viewAgentConfig()">⚙️ Config</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="agent-working-memory">
+                    <h4>Working Memory</h4>
+                    <textarea id="agent-working-content" class="working-memory-editor" placeholder="WORKING.md content..."></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Memory Editor Modal -->
+    <div class="modal" id="memory-modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3 id="memory-modal-title">Edit Memory</h3>
+                <button class="modal-close" onclick="app.closeMemoryModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <textarea id="memory-editor" class="memory-editor" placeholder="File content..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="app.closeMemoryModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="app.saveMemoryFile()">Save Changes</button>
+            </div>
+        </div>
     </div>
 
     <script src="app.js"></script>

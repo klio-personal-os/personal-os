@@ -1,43 +1,92 @@
-// Personal OS Admin Dashboard - Application Logic
-class DashboardApp {
+// Mission Control - Multi-Agent Dashboard Application
+class MissionControl {
     constructor() {
         this.currentView = 'dashboard';
         this.monitoringActive = true;
         this.updateInterval = null;
-        this.historyData = {
-            cpu: Array(20).fill(0),
-            memory: Array(20).fill(0),
-            storage: Array(20).fill(0)
-        };
+        this.activityInterval = null;
+        this.currentAgent = null;
+        this.currentMemoryFile = null;
 
-        this.skills = [
-            { id: 'github', name: 'GitHub', icon: '🐙', status: 'active', description: 'Repository management, PRs, issues' },
-            { id: 'coding-agent', name: 'Coding Agent', icon: '🤖', status: 'active', description: 'Code generation, debugging, refactoring' },
-            { id: 'mcporter', name: 'MCPorter', icon: '🚪', status: 'active', description: 'MCP server integration and management' },
-            { id: 'notion', name: 'Notion', icon: '📝', status: 'inactive', description: 'Notion workspace sync and queries' },
-            { id: 'slack', name: 'Slack', icon: '💬', status: 'active', description: 'Team communication and notifications' },
-            { id: 'terminal', name: 'Terminal', icon: '⬛', status: 'active', description: 'Shell command execution' },
-            { id: 'browser', name: 'Browser', icon: '🌐', status: 'active', description: 'Web browsing and scraping' },
-            { id: 'memory', name: 'Memory', icon: '🧠', status: 'active', description: 'Persistent context storage' }
+        // Agent data
+        this.agents = [
+            { id: 'jarvis', name: 'Jarvis', avatar: '🤵', role: 'Lead Coordinator', session: 'agent:main:main', status: 'active', task: 'Managing agent workflow' },
+            { id: 'shuri', name: 'Shuri', avatar: '👩‍🔬', role: 'Product Analyst', session: 'agent:product-analyst:main', status: 'active', task: 'Analyzing product metrics' },
+            { id: 'fury', name: 'Fury', avatar: '🕶️', role: 'Security Lead', session: 'agent:security:main', status: 'idle', task: 'Monitoring system security' },
+            { id: 'vision', name: 'Vision', avatar: '🔮', role: 'Data Scientist', session: 'agent:data-scientist:main', status: 'active', task: 'Processing data streams' },
+            { id: 'loki', name: 'Loki', avatar: '🦹', role: 'DevOps Engineer', session: 'agent:devops:main', status: 'idle', task: 'Infrastructure management' },
+            { id: 'quill', name: 'Quill', avatar: '🧑‍🚀', role: 'Explorer', session: 'agent:explorer:main', status: 'blocked', task: 'Waiting for input' },
+            { id: 'wanda', name: 'Wanda', avatar: '🧙‍♀️', role: 'Context Manager', session: 'agent:context-manager:main', status: 'active', task: 'Maintaining conversation context' },
+            { id: 'pepper', name: 'Pepper', avatar: '👩‍💼', role: 'Administrator', session: 'agent:admin:main', status: 'active', task: 'Managing admin tasks' },
+            { id: 'friday', name: 'Friday', avatar: '🤖', role: 'Assistant', session: 'agent:assistant:main', status: 'idle', task: 'Ready for commands' },
+            { id: 'wong', name: 'Wong', avatar: '🧙‍♂️', role: 'Librarian', session: 'agent:librarian:main', status: 'active', task: 'Organizing knowledge base' }
         ];
 
-        this.services = [
-            { id: 'gateway', name: 'Gateway Server', icon: '🌐', status: 'running', port: 3000 },
-            { id: 'websocket', name: 'WebSocket', icon: '🔌', status: 'running', port: 3001 },
-            { id: 'api', name: 'API Server', icon: '⚡', status: 'running', port: 3002 },
-            { id: 'mcp-server', name: 'MCP Server', icon: '🚪', status: 'stopped', port: 3003 },
-            { id: 'agent', name: 'Agent Core', icon: '🦁', status: 'running', port: null }
+        // Tasks data
+        this.tasks = [
+            { id: 1, title: 'Review PR #42', description: 'Code review for feature branch', priority: 'high', assignee: 'shuri', status: 'in_progress', createdAt: Date.now() - 3600000 },
+            { id: 2, title: 'Update documentation', description: 'Update API docs', priority: 'low', assignee: 'wong', status: 'assigned', createdAt: Date.now() - 7200000 },
+            { id: 3, title: 'Security audit', description: 'Weekly security check', priority: 'urgent', assignee: 'fury', status: 'inbox', createdAt: Date.now() - 1800000 },
+            { id: 4, title: 'Deploy to staging', description: 'Push latest changes', priority: 'medium', assignee: 'loki', status: 'review', createdAt: Date.now() - 14400000 },
+            { id: 5, title: 'Analyze user metrics', description: 'Weekly analytics report', priority: 'medium', assignee: 'vision', status: 'done', createdAt: Date.now() - 86400000 },
+            { id: 6, title: 'Setup new dev environment', description: 'Configure local environment', priority: 'low', assignee: 'quill', status: 'inbox', createdAt: Date.now() - 900000 },
+            { id: 7, title: 'Memory optimization', description: 'Optimize context handling', priority: 'high', assignee: 'wanda', status: 'in_progress', createdAt: Date.now() - 5400000 },
+            { id: 8, title: 'User onboarding flow', description: 'Design new user flow', priority: 'medium', assignee: 'pepper', status: 'assigned', createdAt: Date.now() - 10800000 }
+        ];
+
+        // Activity feed
+        this.activities = [
+            { agent: 'jarvis', action: 'assigned task', details: 'Review PR #42 to Shuri', time: '2m ago' },
+            { agent: 'wanda', action: 'updated context', details: 'Synced 15 conversation contexts', time: '5m ago' },
+            { agent: 'fury', action: 'completed scan', details: 'Security scan passed', time: '12m ago' },
+            { agent: 'vision', action: 'processed data', details: 'Analyzed 1.2GB of metrics', time: '18m ago' },
+            { agent: 'shuri', action: 'created PR', details: 'PR #43: New analytics feature', time: '25m ago' },
+            { agent: 'loki', action: 'deployed', details: 'v2.4.1 to production', time: '32m ago' }
+        ];
+
+        // Memory files
+        this.memoryFiles = {
+            working: [
+                { name: 'WORKING-jarvis.md', agent: 'jarvis', updated: '5m ago' },
+                { name: 'WORKING-shuri.md', agent: 'shuri', updated: '12m ago' },
+                { name: 'WORKING-vision.md', agent: 'vision', updated: '8m ago' },
+                { name: 'WORKING-wanda.md', agent: 'wanda', updated: '3m ago' },
+                { name: 'WORKING-pepper.md', agent: 'pepper', updated: '20m ago' }
+            ],
+            daily: [
+                { name: 'memory/2025-02-01.md', updated: '2h ago' },
+                { name: 'memory/2025-01-31.md', updated: '1d ago' },
+                { name: 'memory/2025-01-30.md', updated: '2d ago' }
+            ]
+        };
+
+        // Cron jobs
+        this.cronJobs = [
+            { id: 1, schedule: '*/30 * * * *', description: 'Heartbeat check - every 30 minutes', enabled: true },
+            { id: 2, schedule: '0 */1 * * *', description: 'Health check - every hour', enabled: true },
+            { id: 3, schedule: '0 9 * * *', description: 'Daily summary - 9 AM', enabled: true },
+            { id: 4, schedule: '0 0 * * 0', description: 'Weekly cleanup - Sunday midnight', enabled: false }
+        ];
+
+        // Session keys
+        this.sessionKeys = [
+            { name: 'Main', key: 'agent:main:main' },
+            { name: 'Product Analyst', key: 'agent:product-analyst:main' },
+            { name: 'Security', key: 'agent:security:main' },
+            { name: 'Data Scientist', key: 'agent:data-scientist:main' },
+            { name: 'DevOps', key: 'agent:devops:main' },
+            { name: 'Explorer', key: 'agent:explorer:main' }
         ];
 
         this.init();
     }
 
-    async init() {
+    init() {
         this.setupNavigation();
         this.setupTerminal();
         this.updateClock();
-        this.fetchSystemStatus();
-        this.startStatusUpdates();
+        this.renderDashboard();
+        this.startActivityUpdates();
         setInterval(() => this.updateClock(), 1000);
     }
 
@@ -46,7 +95,7 @@ class DashboardApp {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
                 const page = item.dataset.page;
-                this.switchView(page);
+                this.navigateTo(page);
 
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 item.classList.add('active');
@@ -54,612 +103,609 @@ class DashboardApp {
         });
     }
 
-    switchView(viewName) {
-        // Hide all views
-        document.querySelectorAll('.view').forEach(view => {
-            view.classList.remove('active');
-        });
-
-        // Show selected view
+    navigateTo(viewName) {
+        document.querySelectorAll('.view').forEach(view => view.classList.remove('active'));
         const targetView = document.getElementById(`view-${viewName}`);
         if (targetView) {
             targetView.classList.add('active');
             this.currentView = viewName;
         }
 
-        // Update page title
         const titles = {
             dashboard: 'Dashboard',
-            skills: 'Skills',
-            services: 'Services',
-            monitor: 'System Monitor',
-            terminal: 'Terminal',
-            settings: 'Settings'
+            agents: 'Agent Management',
+            tasks: 'Task Board',
+            memory: 'Memory & Context',
+            activity: 'Activity Feed',
+            config: 'Configuration'
         };
         document.querySelector('.page-title').textContent = titles[viewName] || 'Dashboard';
 
         // Load view-specific content
-        if (viewName === 'skills') {
-            this.renderSkills();
-        } else if (viewName === 'services') {
-            this.renderServices();
-        } else if (viewName === 'monitor' && this.monitoringActive) {
-            this.startMonitoring();
+        if (viewName === 'agents') {
+            this.renderAgents();
+        } else if (viewName === 'tasks') {
+            this.renderKanban();
+        } else if (viewName === 'memory') {
+            this.renderMemory();
+        } else if (viewName === 'activity') {
+            this.renderActivity();
+        } else if (viewName === 'config') {
+            this.renderConfig();
         }
     }
 
     updateClock() {
         const now = new Date();
-        const options = { 
-            weekday: 'short', 
-            month: 'short', 
-            day: 'numeric', 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true
-        };
+        const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true };
         const clockEl = document.getElementById('clock');
-        if (clockEl) {
-            clockEl.textContent = now.toLocaleDateString('en-US', options);
-        }
+        if (clockEl) clockEl.textContent = now.toLocaleDateString('en-US', options);
     }
 
-    async fetchSystemStatus() {
-        try {
-            const response = await fetch('/api/status');
-            if (response.ok) {
-                const data = await response.json();
-                this.updateDashboardStats(data);
-            } else {
-                // Use simulated data if API not available
-                this.updateDashboardStats(this.getSimulatedStatus());
-            }
-        } catch (error) {
-            console.log('Using simulated status (API not available)');
-            this.updateDashboardStats(this.getSimulatedStatus());
-        }
-    }
+    // Dashboard
+    renderDashboard() {
+        // Update stats
+        const activeCount = this.agents.filter(a => a.status === 'active').length;
+        const tasksInProgress = this.tasks.filter(t => t.status === 'in_progress').length;
 
-    getSimulatedStatus() {
-        return {
-            cpu: Math.floor(Math.random() * 40) + 15,
-            memory: (Math.random() * 8 + 4).toFixed(1),
-            storage: Math.floor(Math.random() * 30) + 40,
-            uptime: 86400 + Math.floor(Math.random() * 3600),
-            sessions: [
-                { name: 'Main Session', status: 'active', type: 'direct' },
-                { name: 'Sub-agent Session', status: 'active', type: 'subagent' }
-            ]
-        };
-    }
+        document.getElementById('total-agents').textContent = this.agents.length;
+        document.getElementById('active-agents').textContent = activeCount;
+        document.getElementById('total-tasks').textContent = this.tasks.length;
+        document.getElementById('pending-tasks').textContent = tasksInProgress;
+        document.getElementById('agent-count').textContent = this.agents.length;
 
-    updateDashboardStats(data) {
-        // Update stat cards
-        const cpuEl = document.getElementById('stat-cpu');
-        const memEl = document.getElementById('stat-memory');
-        const storageEl = document.getElementById('stat-storage');
-        const uptimeEl = document.getElementById('stat-uptime');
-
-        if (cpuEl) cpuEl.textContent = `${data.cpu || 0}%`;
-        if (memEl) memEl.textContent = data.memory || '--';
-        if (storageEl) storageEl.textContent = `${data.storage || 0}%`;
-        if (uptimeEl) uptimeEl.textContent = this.formatUptime(data.uptime);
-
-        // Update sparklines
-        this.updateSparkline('cpu-sparkline', data.cpu || 0);
-        this.updateSparkline('memory-sparkline', data.memory || 0);
-        this.updateSparkline('storage-sparkline', data.storage || 0);
-
-        // Update monitor page if visible
-        this.updateMonitorPage(data);
-    }
-
-    updateSparkline(id, value) {
-        const el = document.getElementById(id);
-        if (!el) return;
-
-        // Add value to history
-        const key = id.replace('-sparkline', '');
-        if (this.historyData[key]) {
-            this.historyData[key].push(value);
-            this.historyData[key].shift();
-        }
-
-        // Generate SVG path
-        const data = this.historyData[key] || [];
-        const width = 60;
-        const height = 20;
-        const min = Math.min(...data) * 0.9;
-        const max = Math.max(...data, min + 1) * 1.1;
-
-        const points = data.map((val, i) => {
-            const x = (i / (data.length - 1)) * width;
-            const y = height - ((val - min) / (max - min)) * height;
-            return `${x},${y}`;
-        }).join(' ');
-
-        el.innerHTML = `<polyline points="${points}" fill="none" stroke="#007AFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`;
-    }
-
-    updateMonitorPage(data) {
-        const cpuEl = document.getElementById('monitor-cpu');
-        const memEl = document.getElementById('monitor-memory');
-        const storageEl = document.getElementById('monitor-storage');
-
-        if (cpuEl) cpuEl.textContent = data.cpu || '--';
-        if (memEl) memEl.textContent = data.memory || '--';
-        if (storageEl) storageEl.textContent = data.storage || '--';
-
-        // Update progress bars
-        const cpuBar = document.getElementById('monitor-cpu-bar');
-        const memBar = document.getElementById('monitor-memory-bar');
-        const storageBar = document.getElementById('monitor-storage-bar');
-
-        if (cpuBar) cpuBar.style.width = `${data.cpu || 0}%`;
-        if (memBar) memBar.style.width = `${data.memory || 0}%`;
-        if (storageBar) storageBar.style.width = `${data.storage || 0}%`;
-
-        // Update chart
-        this.updateChart(data.cpu || 0);
-    }
-
-    updateChart(value) {
-        // Add to history
-        this.historyData.chart = this.historyData.chart || Array(40).fill(0);
-        this.historyData.chart.push(value);
-        this.historyData.chart.shift();
-
-        const chartArea = document.getElementById('chart-area');
-        const chartLine = document.getElementById('chart-line');
-        if (!chartArea || !chartLine) return;
-
-        const width = 400;
-        const height = 100;
-        const min = 0;
-        const max = 100;
-        const data = this.historyData.chart;
-
-        const linePoints = data.map((val, i) => {
-            const x = (i / (data.length - 1)) * width;
-            const y = height - ((val - min) / (max - min)) * height;
-            return `${x},${y}`;
-        }).join(' ');
-
-        // Create filled area
-        const linePath = linePoints;
-        const areaPath = `${linePath} L${width},${height} L0,${height} Z`;
-
-        chartLine.setAttribute('d', `M${linePoints.replace(/ /g, ' L')}`);
-        chartArea.setAttribute('d', `M${areaPath.replace(/ /g, ' L')}`);
-    }
-
-    startStatusUpdates() {
-        this.updateInterval = setInterval(async () => {
-            if (!this.monitoringActive) return;
-
-            try {
-                const response = await fetch('/api/status');
-                if (response.ok) {
-                    const data = await response.json();
-                    this.updateDashboardStats(data);
-                }
-            } catch (error) {
-                this.updateDashboardStats(this.getSimulatedStatus());
-            }
-        }, 3000);
-    }
-
-    formatUptime(seconds) {
-        if (!seconds) return '--';
-        const days = Math.floor(seconds / 86400);
-        const hours = Math.floor((seconds % 86400) / 3600);
-        const mins = Math.floor((seconds % 3600) / 60);
-
-        if (days > 0) return `${days}d ${hours}h`;
-        if (hours > 0) return `${hours}h ${mins}m`;
-        return `${mins}m`;
-    }
-
-    toggleMonitoring() {
-        this.monitoringActive = !this.monitoringActive;
-        const toggleText = document.getElementById('monitor-toggle-text');
-        const toggleBtn = document.getElementById('monitor-toggle');
-
-        if (toggleText) {
-            toggleText.textContent = this.monitoringActive ? 'Pause' : 'Resume';
-        }
-
-        if (this.monitoringActive) {
-            this.startStatusUpdates();
-        } else {
-            clearInterval(this.updateInterval);
-        }
-    }
-
-    refreshMonitor() {
-        this.fetchSystemStatus();
-    }
-
-    // Skills
-    async renderSkills() {
-        const grid = document.getElementById('skills-grid');
-        if (!grid) return;
-
-        try {
-            const response = await fetch('/api/skills');
-            if (response.ok) {
-                const skillsData = await response.json();
-                // Merge with local skills
-                this.skills = Object.entries(skillsData).map(([id, data]) => ({
-                    id,
-                    ...data,
-                    name: this.skills.find(s => s.id === id)?.name || id,
-                    icon: this.skills.find(s => s.id === id)?.icon || '📦',
-                    description: this.skills.find(s => s.id === id)?.description || ''
-                }));
-            }
-        } catch (error) {
-            console.log('Using local skills data');
-        }
-
-        grid.innerHTML = this.skills.map(skill => `
-            <div class="skill-card" data-skill-id="${skill.id}">
-                <div class="skill-card-header">
-                    <span class="skill-icon">${skill.icon}</span>
-                    <span class="skill-status ${skill.status}">
-                        <span class="skill-status-dot"></span>
-                        ${skill.status}
+        // Render agent quick grid
+        const grid = document.getElementById('agents-quick-grid');
+        grid.innerHTML = this.agents.slice(0, 5).map(agent => `
+            <div class="agent-card" onclick="app.showAgentDetail('${agent.id}')">
+                <div class="agent-card-header">
+                    <span class="agent-avatar">${agent.avatar}</span>
+                    <span class="agent-status ${agent.status}">
+                        <span class="agent-status-dot"></span>
+                        ${agent.status}
                     </span>
                 </div>
-                <h4 class="skill-name">${skill.name}</h4>
-                <p class="skill-description">${skill.description}</p>
-                <div class="skill-actions">
-                    <button class="skill-btn ${skill.status === 'active' ? 'danger' : 'primary'}" 
-                            onclick="app.toggleSkill('${skill.id}')">
-                        ${skill.status === 'active' ? '⏹️ Stop' : '▶️ Start'}
+                <div class="agent-name">${agent.name}</div>
+                <div class="agent-role">${agent.role}</div>
+            </div>
+        `).join('');
+
+        // Render activity
+        this.renderDashboardActivity();
+
+        // Render inbox preview
+        this.renderInboxPreview();
+    }
+
+    renderDashboardActivity() {
+        const container = document.getElementById('dashboard-activity');
+        const recentActivities = this.activities.slice(0, 5);
+
+        container.innerHTML = recentActivities.map(act => {
+            const agent = this.agents.find(a => a.id === act.agent);
+            return `
+                <div class="activity-item">
+                    <span class="activity-avatar">${agent?.avatar || '🤖'}</span>
+                    <div class="activity-content">
+                        <span class="activity-text"><strong>${agent?.name || act.agent}</strong> ${act.action}</span>
+                        <div class="activity-meta">${act.details}</div>
+                    </div>
+                    <span class="activity-time">${act.time}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderInboxPreview() {
+        const container = document.getElementById('inbox-preview');
+        const inboxTasks = this.tasks.filter(t => t.status === 'inbox').slice(0, 4);
+
+        if (inboxTasks.length === 0) {
+            container.innerHTML = '<p style="color: var(--text-secondary); padding: 20px; text-align: center;">No pending tasks</p>';
+            return;
+        }
+
+        container.innerHTML = inboxTasks.map(task => {
+            const assignee = this.agents.find(a => a.id === task.assignee);
+            return `
+                <div class="inbox-task" onclick="app.moveTask(${task.id}, 'assigned')">
+                    <span class="task-priority ${task.priority}"></span>
+                    <div class="task-content">
+                        <span class="task-title">${task.title}</span>
+                        <span class="task-assignee">${assignee?.name || 'Unassigned'}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Agents
+    renderAgents() {
+        const grid = document.getElementById('agents-grid');
+        grid.innerHTML = this.agents.map(agent => `
+            <div class="agent-card">
+                <div class="agent-card-header">
+                    <span class="agent-avatar">${agent.avatar}</span>
+                    <span class="agent-status ${agent.status}">
+                        <span class="agent-status-dot"></span>
+                        ${agent.status}
+                    </span>
+                </div>
+                <div class="agent-name">${agent.name}</div>
+                <div class="agent-role">${agent.role}</div>
+                <div class="agent-session">${agent.session}</div>
+                <div class="agent-task">
+                    <div class="agent-task-label">Current Task</div>
+                    ${agent.task}
+                </div>
+                <div class="agent-actions">
+                    <button class="agent-btn ${agent.status === 'active' ? 'danger' : 'primary'}" 
+                            onclick="app.toggleAgent('${agent.id}')">
+                        ${agent.status === 'active' ? '⏹️ Stop' : '▶️ Start'}
                     </button>
-                    <button class="skill-btn secondary" onclick="app.showSkillActions('${skill.id}')">
-                        ⚡ Actions
-                    </button>
+                    <button class="agent-btn secondary" onclick="app.showAgentDetail('${agent.id}')">⚙️</button>
                 </div>
             </div>
         `).join('');
     }
 
-    async toggleSkill(skillId) {
-        const skill = this.skills.find(s => s.id === skillId);
-        if (!skill) return;
-
-        const newStatus = skill.status === 'active' ? 'inactive' : 'active';
-
-        try {
-            const response = await fetch(`/api/skills/${skillId}/${newStatus === 'active' ? 'start' : 'stop'}`, {
-                method: 'POST'
-            });
-
-            if (response.ok) {
-                skill.status = newStatus;
-                this.renderSkills();
-            }
-        } catch (error) {
-            // Update locally if API fails
-            skill.status = newStatus;
-            this.renderSkills();
+    toggleAgent(agentId) {
+        const agent = this.agents.find(a => a.id === agentId);
+        if (agent) {
+            agent.status = agent.status === 'active' ? 'idle' : 'active';
+            this.addActivity(agentId, agent.status === 'active' ? 'started' : 'stopped', `Agent ${agent.status === 'active' ? 'started' : 'stopped'}`);
+            this.renderAgents();
+            this.updateDashboardStats();
         }
     }
 
-    async startAllSkills() {
-        this.showNotification('Starting all skills...');
-        for (const skill of this.skills) {
-            if (skill.status !== 'active') {
-                await this.toggleSkill(skill.id);
+    startAllAgents() {
+        this.agents.forEach(agent => {
+            if (agent.status !== 'active') {
+                agent.status = 'active';
+                this.addActivity(agent.id, 'started', 'Started by admin');
             }
-        }
-        this.showNotification('All skills started!', 'success');
+        });
+        this.renderAgents();
+        this.updateDashboardStats();
+        this.showNotification('All agents started', 'success');
     }
 
-    async stopAllSkills() {
-        this.showNotification('Stopping all skills...');
-        for (const skill of this.skills) {
-            if (skill.status !== 'inactive') {
-                await this.toggleSkill(skill.id);
+    stopAllAgents() {
+        this.agents.forEach(agent => {
+            if (agent.status !== 'idle') {
+                agent.status = 'idle';
+                this.addActivity(agent.id, 'stopped', 'Stopped by admin');
             }
-        }
-        this.showNotification('All skills stopped!', 'success');
+        });
+        this.renderAgents();
+        this.updateDashboardStats();
+        this.showNotification('All agents stopped', 'success');
     }
 
-    refreshSkills() {
-        this.renderSkills();
-        this.showNotification('Skills refreshed');
+    showAgentDetail(agentId) {
+        const agent = this.agents.find(a => a.id === agentId);
+        if (!agent) return;
+
+        this.currentAgent = agent;
+
+        document.getElementById('agent-modal-title').textContent = `${agent.avatar} ${agent.name}`;
+        document.getElementById('agent-status-badge').textContent = agent.status;
+        document.getElementById('agent-status-badge').className = `agent-status-badge ${agent.status}`;
+        document.getElementById('agent-current-task').textContent = agent.task;
+        document.getElementById('agent-session-key').textContent = agent.session;
+
+        const startBtn = document.getElementById('agent-start-btn');
+        startBtn.textContent = agent.status === 'active' ? '⏹️ Stop' : '▶️ Start';
+        startBtn.onclick = () => this.toggleAgent(agentId);
+
+        document.getElementById('agent-working-content').value = this.getWorkingMemory(agent.id);
+
+        document.getElementById('agent-modal').classList.add('active');
     }
 
-    showSkillActions(skillId) {
-        const actions = this.getSkillActions(skillId);
-        const actionsList = actions.map(action => `
-            <button class="skill-btn secondary" onclick="app.executeSkillAction('${skillId}', '${action.id}')">
-                ${action.icon} ${action.label}
-            </button>
-        `).join('');
-
-        this.showNotification(`Actions for ${skillId}: ${actions.map(a => a.label).join(', ')}`);
+    closeAgentModal() {
+        document.getElementById('agent-modal').classList.remove('active');
+        this.currentAgent = null;
     }
 
-    getSkillActions(skillId) {
-        const actions = {
-            'github': [
-                { id: 'list-repos', icon: '📋', label: 'List Repos' },
-                { id: 'sync', icon: '🔄', label: 'Sync All' }
-            ],
-            'coding-agent': [
-                { id: 'new-task', icon: '✨', label: 'New Task' },
-                { id: 'debug', icon: '🐛', label: 'Debug Mode' }
-            ],
-            'mcporter': [
-                { id: 'list-servers', icon: '🖥️', label: 'List Servers' },
-                { id: 'restart-mcp', icon: '🔄', label: 'Restart All' }
-            ],
-            'notion': [
-                { id: 'sync-pages', icon: '📝', label: 'Sync Pages' },
-                { id: 'query-db', icon: '🔍', label: 'Query DB' }
-            ],
-            'slack': [
-                { id: 'send-msg', icon: '💬', label: 'Send Message' },
-                { id: 'list-channels', icon: '📋', label: 'List Channels' }
-            ],
-            'default': [
-                { id: 'status', icon: '📊', label: 'View Status' },
-                { id: 'reload', icon: '🔄', label: 'Reload' }
-            ]
+    getWorkingMemory(agentId) {
+        const memories = {
+            jarvis: `# Jarvis - Lead Coordinator\n\n## Current Focus\n- Managing agent workflow\n- Coordinating task assignments\n- Monitoring system health\n\n## Recent Actions\n- Assigned 5 tasks this hour\n- Reviewed 3 PRs\n- Synced with 8 agents`,
+            shuri: `# Shuri - Product Analyst\n\n## Current Focus\n- Analyzing product metrics\n- User engagement trends\n- Feature performance\n\n## Recent Actions\n- Generated weekly report\n- Analyzed 15k data points\n- Identified 3 insights`,
+            default: `# Working Memory\n\nNo active tasks. Ready for assignment.`
         };
-        return actions[skillId] || actions['default'];
+        return memories[agentId] || memories.default;
     }
 
-    async executeSkillAction(skillId, actionId) {
-        try {
-            const response = await fetch(`/api/skills/${skillId}/execute`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: actionId })
-            });
-
-            if (response.ok) {
-                this.showNotification(`Action "${actionId}" executed`, 'success');
-            }
-        } catch (error) {
-            this.showNotification(`Action "${actionId}" executed`, 'success');
+    viewAgentSoul() {
+        if (this.currentAgent) {
+            this.openMemoryFile('SOUL.md', true);
         }
     }
 
-    // Services
-    async renderServices() {
-        const list = document.getElementById('services-list');
-        if (!list) return;
+    viewAgentConfig() {
+        if (this.currentAgent) {
+            this.openMemoryFile('AGENTS.md', true);
+        }
+    }
 
-        try {
-            const response = await fetch('/api/services');
-            if (response.ok) {
-                const servicesData = await response.json();
-                this.services = Object.entries(servicesData).map(([id, data]) => ({
-                    id,
-                    ...data,
-                    name: this.services.find(s => s.id === id)?.name || id,
-                    icon: this.services.find(s => s.id === id)?.icon || '🔧'
-                }));
+    updateDashboardStats() {
+        const activeCount = this.agents.filter(a => a.status === 'active').length;
+        const tasksInProgress = this.tasks.filter(t => t.status === 'in_progress').length;
+
+        document.getElementById('active-agents').textContent = activeCount;
+        document.getElementById('pending-tasks').textContent = tasksInProgress;
+        document.getElementById('agent-count').textContent = this.agents.length;
+    }
+
+    // Tasks / Kanban
+    renderKanban() {
+        const columns = ['inbox', 'assigned', 'in_progress', 'review', 'done'];
+        const columnLabels = {
+            inbox: '📥 Inbox',
+            assigned: '📋 Assigned',
+            in_progress: '⚡ In Progress',
+            review: '👀 Review',
+            done: '✅ Done'
+        };
+
+        const board = document.getElementById('kanban-board');
+        board.innerHTML = columns.map(col => {
+            const tasks = this.tasks.filter(t => t.status === col);
+            return `
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <span class="kanban-title">${columnLabels[col]}</span>
+                        <span class="kanban-count">${tasks.length}</span>
+                    </div>
+                    <div class="kanban-tasks" data-status="${col}" ondrop="app.dropTask(event)" ondragover="app.dragOver(event)">
+                        ${tasks.map(task => this.renderKanbanTask(task)).join('')}
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    renderKanbanTask(task) {
+        const assignee = this.agents.find(a => a.id === task.assignee);
+        return `
+            <div class="kanban-task" draggable="true" ondragstart="app.dragStart(event, ${task.id})">
+                <span class="task-priority-badge ${task.priority}">${task.priority.toUpperCase()}</span>
+                <div class="kanban-task-title">${task.title}</div>
+                <div class="kanban-task-footer">
+                    <span class="task-assignee-avatar">${assignee?.avatar || '👤'}</span>
+                    <span class="task-due">${this.formatTimeAgo(task.createdAt)}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    dragStart(event, taskId) {
+        event.dataTransfer.setData('text/plain', taskId);
+        event.target.classList.add('dragging');
+    }
+
+    dragOver(event) {
+        event.preventDefault();
+    }
+
+    dropTask(event) {
+        event.preventDefault();
+        const taskId = parseInt(event.dataTransfer.getData('text/plain'));
+        const column = event.target.closest('.kanban-tasks');
+        const newStatus = column?.dataset.status;
+
+        if (taskId && newStatus) {
+            const task = this.tasks.find(t => t.id === taskId);
+            if (task) {
+                const oldStatus = task.status;
+                task.status = newStatus;
+                this.addActivity(task.assignee || 'system', 'moved task', `Moved "${task.title}" from ${oldStatus} to ${newStatus}`);
+                this.renderKanban();
             }
-        } catch (error) {
-            console.log('Using local services data');
+        }
+        document.querySelectorAll('.kanban-task').forEach(t => t.classList.remove('dragging'));
+    }
+
+    moveTask(taskId, newStatus) {
+        const task = this.tasks.find(t => t.id === taskId);
+        if (task) {
+            task.status = newStatus;
+            this.renderKanban();
+            this.renderInboxPreview();
+        }
+    }
+
+    showTaskModal() {
+        // Populate assignee dropdown
+        const select = document.getElementById('task-assignee');
+        select.innerHTML = '<option value="">Unassigned</option>' +
+            this.agents.map(a => `<option value="${a.id}">${a.name} (${a.role})</option>`).join('');
+
+        document.getElementById('task-modal').classList.add('active');
+    }
+
+    closeTaskModal() {
+        document.getElementById('task-modal').classList.remove('active');
+        document.getElementById('task-title').value = '';
+        document.getElementById('task-description').value = '';
+        document.getElementById('task-assignee').value = '';
+        document.getElementById('task-priority').value = 'medium';
+    }
+
+    createTask() {
+        const title = document.getElementById('task-title').value.trim();
+        const description = document.getElementById('task-description').value.trim();
+        const assignee = document.getElementById('task-assignee').value;
+        const priority = document.getElementById('task-priority').value;
+
+        if (!title) {
+            this.showNotification('Please enter a task title', 'error');
+            return;
         }
 
-        list.innerHTML = this.services.map(service => `
-            <div class="service-card">
-                <div class="service-icon">${service.icon}</div>
-                <div class="service-info">
-                    <span class="service-name">${service.name}</span>
-                    <span class="service-port">${service.port ? `Port: ${service.port}` : 'Core Service'}</span>
-                </div>
-                <div class="service-status">
-                    <span class="service-indicator ${service.status}"></span>
-                    <span style="font-size: 13px; color: var(--text-secondary);">${service.status}</span>
-                </div>
-                <div class="service-actions">
-                    ${service.status === 'running' ? `
-                        <button class="service-btn stop" onclick="app.controlService('${service.id}', 'stop')">⏹️</button>
-                        <button class="service-btn restart" onclick="app.controlService('${service.id}', 'restart')">🔄</button>
-                    ` : `
-                        <button class="service-btn start" onclick="app.controlService('${service.id}', 'start')">▶️</button>
-                    `}
-                </div>
+        const newTask = {
+            id: Date.now(),
+            title,
+            description,
+            priority,
+            assignee: assignee || null,
+            status: 'inbox',
+            createdAt: Date.now()
+        };
+
+        this.tasks.unshift(newTask);
+        this.addActivity(assignee || 'system', 'created task', `Created "${title}"`);
+
+        this.closeTaskModal();
+        this.renderKanban();
+        this.renderInboxPreview();
+        this.updateDashboardStats();
+        this.showNotification('Task created successfully', 'success');
+    }
+
+    // Memory
+    renderMemory() {
+        // Working files
+        const workingContainer = document.getElementById('working-files');
+        workingContainer.innerHTML = this.memoryFiles.working.map(file => `
+            <div class="memory-file-card" onclick="app.openMemoryFile('${file.name}', false, '${file.agent}')">
+                <span class="file-icon">📄</span>
+                <span class="file-name">${file.name}</span>
+                <span style="margin-left: auto; font-size: 11px; color: var(--text-muted);">${file.updated}</span>
+            </div>
+        `).join('');
+
+        // Daily notes
+        const dailyContainer = document.getElementById('daily-notes');
+        dailyContainer.innerHTML = this.memoryFiles.daily.map(note => `
+            <div class="memory-file-card" onclick="app.openMemoryFile('${note.name}')">
+                <span class="file-icon">📅</span>
+                <span class="file-name">${note.name.replace('memory/', '')}</span>
+                <span style="margin-left: auto; font-size: 11px; color: var(--text-muted);">${note.updated}</span>
             </div>
         `).join('');
     }
 
-    async controlService(serviceId, action) {
-        try {
-            const response = await fetch(`/api/services/${serviceId}/${action}`, {
-                method: 'POST'
-            });
+    openMemoryFile(fileName, isConfig = false, agentId = null) {
+        this.currentMemoryFile = fileName;
 
-            if (response.ok) {
-                this.showNotification(`${serviceId}: ${action}ing...`);
-                this.renderServices();
-                setTimeout(() => {
-                    this.showNotification(`${serviceId} ${action}ed successfully!`, 'success');
-                }, 500);
-            }
-        } catch (error) {
-            // Update locally if API fails
-            const service = this.services.find(s => s.id === serviceId);
-            if (service) {
-                service.status = action === 'start' ? 'running' : 'stopped';
-                this.renderServices();
-                this.showNotification(`${serviceId} ${action}ed successfully!`, 'success');
-            }
-        }
+        document.getElementById('memory-modal-title').textContent = fileName;
+        document.getElementById('memory-editor').value = this.getMemoryContent(fileName, agentId);
+        document.getElementById('memory-modal').classList.add('active');
     }
 
-    startAllServices() {
-        this.showNotification('Starting all services...');
-        this.services.filter(s => s.status !== 'running').forEach(s => {
-            this.controlService(s.id, 'start');
-        });
+    getMemoryContent(fileName, agentId) {
+        const contents = {
+            'SOUL.md': `# SOUL.md - Agent Personality
+
+## Core Identity
+You are Clawdbot, a multi-agent AI system designed to help humans manage complex tasks.
+
+## Values
+- Accuracy over speed
+- Transparency in decision-making
+- Continuous learning
+
+## Constraints
+- Never exfiltrate private data
+- Always ask before taking irreversible actions
+- Maintain context across sessions`,
+
+            'AGENTS.md': `# AGENTS.md - Agent Configuration
+
+## Agent Roles
+- **Jarvis**: Lead Coordinator - manages agent workflow
+- **Shuri**: Product Analyst - metrics and insights
+- **Fury**: Security Lead - system protection
+- **Vision**: Data Scientist - data processing
+- **Loki**: DevOps Engineer - infrastructure
+- **Quill**: Explorer - discovery tasks
+- **Wanda**: Context Manager - memory handling
+- **Pepper**: Administrator - admin tasks
+- **Friday**: Assistant - general assistance
+- **Wong**: Librarian - knowledge management`,
+
+            'TOOLS.md': `# TOOLS.md - Tool Configuration
+
+## Available Tools
+- Shell commands via exec
+- Web search via web_search
+- File operations via read/write/edit
+- Messaging via message
+- Browser automation via browser
+
+## Preferences
+- Default shell: bash
+- Editor: vim for quick edits`,
+
+            'MEMORY.md': `# MEMORY.md - Long-term Memory
+
+## Key Learnings
+- User prefers detailed explanations
+- Use TTS for storytelling
+- Keep daily notes for continuity
+
+## Important Context
+- Ben is the primary user
+- Personal OS is the main project
+- Multiple GitHub accounts to manage`,
+
+            'WORKING-jarvis.md': this.getWorkingMemory('jarvis'),
+            'WORKING-shuri.md': this.getWorkingMemory('shuri'),
+            'WORKING-vision.md': this.getWorkingMemory('vision'),
+            'WORKING-wanda.md': this.getWorkingMemory('wanda'),
+            'WORKING-pepper.md': this.getWorkingMemory('pepper')
+        };
+
+        return contents[fileName] || `# ${fileName}\n\nNo content available.`;
     }
 
-    stopAllServices() {
-        this.showNotification('Stopping all services...');
-        this.services.filter(s => s.status !== 'stopped').forEach(s => {
-            this.controlService(s.id, 'stop');
-        });
+    closeMemoryModal() {
+        document.getElementById('memory-modal').classList.remove('active');
+        this.currentMemoryFile = null;
     }
 
-    restartAllServices() {
-        this.showNotification('Restarting all services...');
-        this.services.forEach(s => {
-            this.controlService(s.id, 'restart');
-        });
+    saveMemoryFile() {
+        const content = document.getElementById('memory-editor').value;
+        // In a real app, this would save to the file system
+        this.showNotification(`${this.currentMemoryFile} saved successfully`, 'success');
+        this.closeMemoryModal();
+    }
+
+    refreshMemory() {
+        this.renderMemory();
+        this.showNotification('Memory files refreshed');
     }
 
     // Activity
-    refreshActivity() {
-        const activityList = document.getElementById('activity-list');
-        if (!activityList) return;
-
-        // Add a new activity item
-        const activities = [
-            { icon: '🧠', text: 'Memory updated' },
-            { icon: '🔧', text: 'Service health check' },
-            { icon: '💬', text: 'Notification sent' },
-            { icon: '📊', text: 'Stats aggregated' }
-        ];
-
-        const newActivity = activities[Math.floor(Math.random() * activities.length)];
-
-        activityList.insertBefore(`
-            <div class="activity-item">
-                <span class="activity-icon">${newActivity.icon}</span>
-                <span class="activity-text">${newActivity.text}</span>
-                <span class="activity-time">just now</span>
-            </div>
-        `, activityList.firstChild);
-
-        // Update times of other items
-        const times = activityList.querySelectorAll('.activity-time');
-        times.forEach((el, i) => {
-            if (i === 0) {
-                el.textContent = 'just now';
-            } else {
-                const mins = i * 2;
-                el.textContent = `${mins}m ago`;
-            }
-        });
-
-        this.showNotification('Activity refreshed');
-    }
-
-    // Terminal
-    setupTerminal() {
-        const input = document.getElementById('terminal-input');
-        if (!input) return;
-
-        input.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                const command = input.value.trim();
-                if (command) {
-                    this.executeCommand(command);
-                }
-                input.value = '';
-            }
-        });
-    }
-
-    executeCommand(command) {
-        const output = document.getElementById('terminal-output');
-        if (!output) return;
-
-        // Add command to output
-        const cmdLine = document.createElement('div');
-        cmdLine.className = 'terminal-line';
-        cmdLine.innerHTML = `<span class="terminal-prompt">$</span> ${command}`;
-        output.appendChild(cmdLine);
-
-        // Process command
-        let response = '';
-        let responseClass = '';
-
-        switch (command.toLowerCase()) {
-            case 'help':
-                response = `Available commands:
-  help     - Show this help
-  date     - Show current date/time
-  whoami   - Show current user
-  uptime   - Show system uptime
-  clear    - Clear terminal
-  status   - Show system status
-  skills   - List all skills
-  services - List all services`;
-                break;
-            case 'date':
-                response = new Date().toString();
-                break;
-            case 'whoami':
-                response = 'clawdbot';
-                break;
-            case 'uptime':
-                response = `System uptime: ${this.formatUptime(Date.now() / 1000)}`;
-                break;
-            case 'clear':
-                output.innerHTML = '';
-                return;
-            case 'status':
-                response = `CPU: ${document.getElementById('stat-cpu')?.textContent || '--'}
-Memory: ${document.getElementById('stat-memory')?.textContent || '--'} GB
-Storage: ${document.getElementById('stat-storage')?.textContent || '--'}%`;
-                break;
-            case 'skills':
-                response = this.skills.map(s => `${s.icon} ${s.name}: ${s.status}`).join('\n');
-                break;
-            case 'services':
-                response = this.services.map(s => `${s.icon} ${s.name}: ${s.status}`).join('\n');
-                break;
-            default:
-                responseClass = 'error';
-                response = `Command not found: ${command}. Type 'help' for available commands.`;
-        }
-
-        // Add response to output
-        if (response) {
-            const responseLine = document.createElement('div');
-            responseLine.className = `terminal-line ${responseClass}`;
-            responseLine.innerHTML = response.replace(/\n/g, '<br>');
-            output.appendChild(responseLine);
-        }
-
-        // Scroll to bottom
-        output.scrollTop = output.scrollHeight;
-    }
-
-    clearTerminal() {
-        const output = document.getElementById('terminal-output');
-        if (output) {
-            output.innerHTML = `
-                <div class="terminal-line info">
-                    <span class="terminal-prompt">$</span> Terminal cleared
+    renderActivity() {
+        const stream = document.getElementById('activity-stream');
+        stream.innerHTML = this.activities.map(act => {
+            const agent = this.agents.find(a => a.id === act.agent);
+            return `
+                <div class="activity-stream-item">
+                    <span class="activity-stream-avatar">${agent?.avatar || '🤖'}</span>
+                    <div class="activity-stream-content">
+                        <div class="activity-stream-header">
+                            <span class="activity-stream-agent">${agent?.name || act.agent}</span>
+                            <span class="activity-stream-action">${act.action}</span>
+                            <span class="activity-stream-time">${act.time}</span>
+                        </div>
+                        <div class="activity-stream-details">${act.details}</div>
+                    </div>
                 </div>
-                <div class="terminal-line"></div>
             `;
+        }).join('');
+    }
+
+    addActivity(agentId, action, details) {
+        this.activities.unshift({
+            agent: agentId,
+            action,
+            details,
+            time: 'just now'
+        });
+        // Keep only last 50 activities
+        this.activities = this.activities.slice(0, 50);
+    }
+
+    startActivityUpdates() {
+        // Simulate new activities
+        this.activityInterval = setInterval(() => {
+            if (!this.monitoringActive) return;
+
+            const actions = [
+                { action: 'completed task', details: 'Finished processing request' },
+                { action: 'sent message', details: 'Delivered notification to user' },
+                { action: 'updated memory', details: 'Saved context to memory' },
+                { action: 'synced data', details: 'Synchronized with external service' },
+                { action: 'checked status', details: 'Health check passed' }
+            ];
+
+            const activeAgents = this.agents.filter(a => a.status === 'active');
+            if (activeAgents.length > 0 && Math.random() > 0.7) {
+                const agent = activeAgents[Math.floor(Math.random() * activeAgents.length)];
+                const activity = actions[Math.floor(Math.random() * actions.length)];
+                this.activities.unshift({
+                    agent: agent.id,
+                    action: activity.action,
+                    details: activity.details,
+                    time: 'just now'
+                });
+                this.renderActivity();
+            }
+        }, 10000);
+    }
+
+    toggleActivityStream() {
+        this.monitoringActive = !this.monitoringActive;
+        const toggleText = document.getElementById('stream-toggle-text');
+        if (toggleText) {
+            toggleText.textContent = this.monitoringActive ? '⏸️ Pause' : '▶️ Resume';
         }
     }
 
-    // Notification
+    // Config
+    renderConfig() {
+        // Cron jobs
+        const cronList = document.getElementById('cron-list');
+        cronList.innerHTML = this.cronJobs.map(cron => `
+            <div class="cron-item">
+                <span class="cron-schedule">${cron.schedule}</span>
+                <span class="cron-description">${cron.description}</span>
+                <div class="cron-actions">
+                    <button class="btn btn-sm ${cron.enabled ? 'btn-secondary' : 'btn-success'}" 
+                            onclick="app.toggleCron(${cron.id})">
+                        ${cron.enabled ? 'Disable' : 'Enable'}
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        // Session keys
+        const keysList = document.getElementById('session-keys');
+        keysList.innerHTML = this.sessionKeys.map(key => `
+            <div class="session-key-item">
+                <span class="session-key-name">${key.name}</span>
+                <code class="session-key-value">${key.key}</code>
+            </div>
+        `).join('');
+    }
+
+    toggleCron(cronId) {
+        const cron = this.cronJobs.find(c => c.id === cronId);
+        if (cron) {
+            cron.enabled = !cron.enabled;
+            this.renderConfig();
+            this.showNotification(`Schedule ${cron.enabled ? 'enabled' : 'disabled'}`, 'success');
+        }
+    }
+
+    addCronJob() {
+        this.showNotification('Add cron job functionality coming soon');
+    }
+
+    // Utility
+    formatTimeAgo(timestamp) {
+        const diff = Date.now() - timestamp;
+        const mins = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+
+        if (mins < 1) return 'just now';
+        if (mins < 60) return `${mins}m ago`;
+        if (hours < 24) return `${hours}h ago`;
+        return `${days}d ago`;
+    }
+
     showNotification(message, type = 'info') {
         const notification = document.createElement('div');
         notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <span class="notification-icon">${type === 'success' ? '✅' : 'ℹ️'}</span>
-            <span class="notification-message">${message}</span>
-        `;
+        notification.innerHTML = `<span>${type === 'success' ? '✅' : 'ℹ️'}</span><span>${message}</span>`;
 
         document.body.appendChild(notification);
-
         notification.style.cssText = `
             position: fixed;
             bottom: 32px;
@@ -677,42 +723,21 @@ Storage: ${document.getElementById('stat-storage')?.textContent || '--'}%`;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         `;
 
-        // Auto-remove
         setTimeout(() => {
             notification.style.animation = 'fadeOut 0.3s ease-in forwards';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
-    }
-
-    startMonitoring() {
-        // Already handled by startStatusUpdates
     }
 }
 
 // Add notification animations
 const style = document.createElement('style');
 style.textContent = `
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateX(50px);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
-    }
-    @keyframes fadeOut {
-        from {
-            opacity: 1;
-        }
-        to {
-            opacity: 0;
-        }
-    }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
 `;
 document.head.appendChild(style);
 
 // Initialize app
-const app = new DashboardApp();
+const app = new MissionControl();
 window.app = app;

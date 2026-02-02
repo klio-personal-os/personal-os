@@ -3,468 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mission Control - Multi-Agent Dashboard</title>
+    <title>Mission Control</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Left Sidebar Navigation -->
+    <div class="app">
+        <!-- Sidebar -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <div class="logo-icon">🎯</div>
-                <h1 class="logo-text">Mission Control</h1>
+                <div class="logo">🚀</div>
+                <h1>Mission Control</h1>
             </div>
-            
-            <nav class="sidebar-nav">
-                <a href="#" class="nav-item active" data-page="dashboard">
-                    <span class="nav-icon">📊</span>
-                    <span class="nav-label">Dashboard</span>
+            <nav class="nav">
+                <a href="#" class="nav-item active" data-view="board">
+                    <span class="nav-icon">📋</span>
+                    Task Board
                 </a>
-                <a href="#" class="nav-item" data-page="agents">
+                <a href="#" class="nav-item" data-view="agents">
                     <span class="nav-icon">🤖</span>
-                    <span class="nav-label">Agents</span>
+                    Agents
                 </a>
-                <a href="#" class="nav-item" data-page="tasks">
-                    <span class="nav-icon">📋</span>
-                    <span class="nav-label">Tasks</span>
-                </a>
-                <a href="#" class="nav-item" data-page="memory">
-                    <span class="nav-icon">🧠</span>
-                    <span class="nav-label">Memory</span>
-                </a>
-                <a href="#" class="nav-item" data-page="activity">
-                    <span class="nav-icon">📡</span>
-                    <span class="nav-label">Activity</span>
-                </a>
-                <a href="#" class="nav-item" data-page="config">
-                    <span class="nav-icon">⚙️</span>
-                    <span class="nav-label">Config</span>
-                </a>
-                <a href="#" class="nav-item" data-page="reports">
-                    <span class="nav-icon">📋</span>
-                    <span class="nav-label">Reports</span>
+                <a href="#" class="nav-item" data-view="features">
+                    <span class="nav-icon">✨</span>
+                    Features
                 </a>
             </nav>
-
             <div class="sidebar-footer">
-                <div class="user-info">
-                    <div class="user-avatar">🎯</div>
-                    <div class="user-details">
-                        <span class="user-name">Mission Control</span>
-                        <span class="user-status online">● <span id="agent-count">5</span> agents</span>
-                    </div>
+                <div class="user">
+                    <div class="user-avatar">👤</div>
+                    <span>Ben</span>
                 </div>
             </div>
         </aside>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Top Header -->
-            <header class="top-header">
-                <div class="header-left">
-                    <h1 class="page-title" id="page-title">Dashboard</h1>
+        <!-- Main Content -->
+        <main class="main">
+            <!-- Board View -->
+            <div class="view active" id="view-board">
+                <div class="view-header">
+                    <h2>Task Board</h2>
+                    <button class="btn btn-primary" onclick="app.showTaskModal()">+ New Task</button>
                 </div>
-                <div class="header-right">
-                    <span class="system-status">
-                        <span class="status-dot active"></span>
-                        <span class="status-text">System Online</span>
-                    </span>
-                    <span class="clock" id="clock"></span>
-                </div>
-            </header>
-
-            <!-- Content Area -->
-            <div class="content-area">
-                <!-- Dashboard View -->
-                <div class="view active" id="view-dashboard">
-                    <!-- Stats Overview -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon">🤖</div>
-                            <div class="stat-info">
-                                <span class="stat-value" id="total-agents">--</span>
-                                <span class="stat-label">Total Agents</span>
-                            </div>
+                <div class="board">
+                    <div class="column" data-status="backlog">
+                        <div class="column-header">
+                            <span class="column-icon">📥</span>
+                            Backlog
+                            <span class="column-count" id="count-backlog">0</span>
                         </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">✅</div>
-                            <div class="stat-info">
-                                <span class="stat-value" id="active-agents">--</span>
-                                <span class="stat-label">Active</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">📋</div>
-                            <div class="stat-info">
-                                <span class="stat-value" id="total-tasks">--</span>
-                                <span class="stat-label">Tasks</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon">⚡</div>
-                            <div class="stat-info">
-                                <span class="stat-value" id="pending-tasks">--</span>
-                                <span class="stat-label">In Progress</span>
-                            </div>
-                        </div>
+                        <div class="column-tasks" id="backlog"></div>
                     </div>
-
-                    <!-- Agent Grid Overview -->
-                    <div class="section">
-                        <div class="section-header">
-                            <h2>Agent Team</h2>
-                            <button class="btn btn-secondary" onclick="app.navigateTo('agents')">View All →</button>
+                    <div class="column" data-status="todo">
+                        <div class="column-header">
+                            <span class="column-icon">📝</span>
+                            To Do
+                            <span class="column-count" id="count-todo">0</span>
                         </div>
-                        <div class="agents-quick-grid" id="agents-quick-grid">
-                            <!-- Agent cards populated by JS -->
-                        </div>
+                        <div class="column-tasks" id="todo"></div>
                     </div>
-
-                    <!-- Activity & Tasks Row -->
-                    <div class="cards-row">
-                        <!-- Recent Activity -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Recent Activity</h3>
-                                <button class="card-action" onclick="app.navigateTo('activity')">
-                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M23 4v6h-6M1 20v-6h6"/>
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="card-content">
-                                <div class="activity-feed" id="dashboard-activity">
-                                    <!-- Activity items populated by JS -->
-                                </div>
-                            </div>
+                    <div class="column" data-status="doing">
+                        <div class="column-header">
+                            <span class="column-icon">🔥</span>
+                            In Progress
+                            <span class="column-count" id="count-doing">0</span>
                         </div>
-
-                        <!-- Inbox Tasks -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>Inbox</h3>
-                                <button class="btn btn-primary btn-sm" onclick="app.showTaskModal()">+ New Task</button>
-                            </div>
-                            <div class="card-content">
-                                <div class="inbox-tasks" id="inbox-preview">
-                                    <!-- Inbox tasks populated by JS -->
-                                </div>
-                            </div>
+                        <div class="column-tasks" id="doing"></div>
+                    </div>
+                    <div class="column" data-status="review">
+                        <div class="column-header">
+                            <span class="column-icon">👀</span>
+                            Review
+                            <span class="column-count" id="count-review">0</span>
                         </div>
+                        <div class="column-tasks" id="review"></div>
+                    </div>
+                    <div class="column" data-status="done">
+                        <div class="column-header">
+                            <span class="column-icon">✅</span>
+                            Done
+                            <span class="column-count" id="count-done">0</span>
+                        </div>
+                        <div class="column-tasks" id="done"></div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Agents View -->
-                <div class="view" id="view-agents">
-                    <div class="view-header">
-                        <div>
-                            <h2>Agent Management</h2>
-                            <p>Control and configure your agent team</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-primary" onclick="app.startAllAgents()">▶️ Start All</button>
-                            <button class="btn btn-danger" onclick="app.stopAllAgents()">⏹️ Stop All</button>
-                        </div>
-                    </div>
-
-                    <div class="agents-grid" id="agents-grid">
-                        <!-- Agent cards populated by JS -->
-                    </div>
+            <!-- Agents View -->
+            <div class="view" id="view-agents">
+                <div class="view-header">
+                    <h2>Agents</h2>
                 </div>
+                <div class="agents-grid" id="agents-grid"></div>
+            </div>
 
-                <!-- Tasks View (Kanban) -->
-                <div class="view" id="view-tasks">
-                    <div class="view-header">
-                        <div>
-                            <h2>Task Board</h2>
-                            <p>Manage and track agent tasks</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-primary" onclick="app.showTaskModal()">+ New Task</button>
-                        </div>
-                    </div>
-
-                    <div class="kanban-board" id="kanban-board">
-                        <!-- Kanban columns populated by JS -->
-                    </div>
+            <!-- Features View -->
+            <div class="view" id="view-features">
+                <div class="view-header">
+                    <h2>Feature Approval</h2>
                 </div>
-
-                <!-- Memory View -->
-                <div class="view" id="view-memory">
-                    <div class="view-header">
-                        <div>
-                            <h2>Memory & Context</h2>
-                            <p>View and edit agent memories and context</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-secondary" onclick="app.refreshMemory()">🔄 Refresh</button>
-                        </div>
-                    </div>
-
-                    <div class="memory-grid">
-                        <!-- Working.md Files -->
-                        <div class="memory-section">
-                            <h3>📝 Working Memory</h3>
-                            <div class="memory-files" id="working-files">
-                                <!-- Files populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- Daily Notes -->
-                        <div class="memory-section">
-                            <h3>📅 Daily Notes</h3>
-                            <div class="memory-files" id="daily-notes">
-                                <!-- Notes populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- Long-term Memory -->
-                        <div class="memory-section">
-                            <h3>🧠 Long-term Memory</h3>
-                            <div class="memory-file-card" onclick="app.openMemoryFile('MEMORY.md')">
-                                <span class="file-icon">📄</span>
-                                <span class="file-name">MEMORY.md</span>
-                            </div>
-                        </div>
-
-                        <!-- Configuration -->
-                        <div class="memory-section">
-                            <h3>⚙️ Configuration</h3>
-                            <div class="memory-files" id="config-files">
-                                <div class="memory-file-card" onclick="app.openMemoryFile('SOUL.md')">
-                                    <span class="file-icon">📄</span>
-                                    <span class="file-name">SOUL.md</span>
-                                </div>
-                                <div class="memory-file-card" onclick="app.openMemoryFile('AGENTS.md')">
-                                    <span class="file-icon">📄</span>
-                                    <span class="file-name">AGENTS.md</span>
-                                </div>
-                                <div class="memory-file-card" onclick="app.openMemoryFile('TOOLS.md')">
-                                    <span class="file-icon">📄</span>
-                                    <span class="file-name">TOOLS.md</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Activity View -->
-                <div class="view" id="view-activity">
-                    <div class="view-header">
-                        <div>
-                            <h2>Activity Feed</h2>
-                            <p>Real-time stream of agent activity</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-secondary" onclick="app.toggleActivityStream()">
-                                <span id="stream-toggle-text">⏸️ Pause</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="activity-stream" id="activity-stream">
-                        <!-- Activity items populated by JS -->
-                    </div>
-                </div>
-
-                <!-- Config View -->
-                <div class="view" id="view-config">
-                    <div class="view-header">
-                        <div>
-                            <h2>Configuration</h2>
-                            <p>Manage agent schedules and settings</p>
-                        </div>
-                    </div>
-
-                    <div class="config-sections">
-                        <!-- Cron Schedules -->
-                        <div class="config-section">
-                            <h3>⏰ Cron Schedules</h3>
-                            <div class="cron-list" id="cron-list">
-                                <!-- Cron jobs populated by JS -->
-                            </div>
-                            <button class="btn btn-secondary" onclick="app.addCronJob()">+ Add Schedule</button>
-                        </div>
-
-                        <!-- Session Keys -->
-                        <div class="config-section">
-                            <h3>🔑 Session Keys</h3>
-                            <div class="session-keys" id="session-keys">
-                                <!-- Session keys populated by JS -->
-                            </div>
-                        </div>
-
-                        <!-- Heartbeat Config -->
-                        <div class="config-section">
-                            <h3>💓 Heartbeat Settings</h3>
-                            <div class="setting-item">
-                                <div class="setting-info">
-                                    <span class="setting-label">Heartbeat Interval</span>
-                                    <span class="setting-desc">How often to check for updates</span>
-                                </div>
-                                <div class="setting-control">
-                                    <select class="setting-select">
-                                        <option value="15">15 minutes</option>
-                                        <option value="30" selected>30 minutes</option>
-                                        <option value="60">1 hour</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reports View -->
-                <div class="view" id="view-reports">
-                    <div class="view-header">
-                        <div>
-                            <h2>Agent Reports</h2>
-                            <p>What your agents are working on</p>
-                        </div>
-                        <div class="view-actions">
-                            <button class="btn btn-secondary" onclick="app.refreshReports()">🔄 Refresh</button>
-                        </div>
-                    </div>
-
-                    <!-- Agent Reports Grid -->
-                    <div class="reports-grid" id="reports-grid">
-                        <!-- Agent reports populated by JS -->
-                    </div>
-
-                    <!-- Activity Feed -->
-                    <div class="section">
-                        <div class="section-header">
-                            <h2>Recent Activity</h2>
-                        </div>
-                        <div class="reports-activity" id="reports-activity">
-                            <!-- Activity items populated by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Feature Approval -->
-                    <div class="section">
-                        <div class="section-header">
-                            <h2>Feature Approval</h2>
-                            <button class="btn btn-secondary btn-sm" onclick="app.loadFeatures()">🔄 Refresh</button>
-                        </div>
-                        <div class="features-list" id="features-list">
-                            <!-- Features populated by JS -->
-                        </div>
-                    </div>
-
-                    <!-- Hourly Report -->
-                    <div class="section">
-                        <div class="section-header">
-                            <h2>Hourly Summary</h2>
-                            <button class="btn btn-secondary btn-sm" onclick="app.loadHourlyReport()">🔄 Refresh</button>
-                        </div>
-                        <div class="hourly-report" id="hourly-report">
-                            <div class="loading">Loading hourly report...</div>
-                        </div>
-                    </div>
-
-                    <!-- Product Ideas -->
-                    <div class="section" id="ideas-section" style="display: none;">
-                        <div class="section-header">
-                            <h2>💡 Product Ideas</h2>
-                        </div>
-                        <div class="ideas-list" id="ideas-list">
-                            <!-- Ideas populated by JS -->
-                        </div>
-                    </div>
-                </div>
+                <div class="features-grid" id="features-grid"></div>
             </div>
         </main>
     </div>
 
     <!-- Task Modal -->
     <div class="modal" id="task-modal">
+        <div class="modal-backdrop" onclick="app.hideTaskModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Create New Task</h3>
-                <button class="modal-close" onclick="app.closeTaskModal()">×</button>
+                <h3 id="task-modal-title">New Task</h3>
+                <button class="modal-close" onclick="app.hideTaskModal()">×</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Task Title</label>
-                    <input type="text" id="task-title" placeholder="Enter task title...">
+                    <label>Title</label>
+                    <input type="text" id="task-title" placeholder="Task title...">
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea id="task-description" placeholder="Task description..."></textarea>
+                    <textarea id="task-desc" placeholder="What needs to be done..."></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Assign To</label>
-                    <select id="task-assignee">
-                        <option value="">Unassigned</option>
-                        <!-- Options populated by JS -->
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Priority</label>
-                    <select id="task-priority">
-                        <option value="low">Low</option>
-                        <option value="medium" selected>Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Assign to</label>
+                        <select id="task-agent">
+                            <option value="">Unassigned</option>
+                            <option value="beacon">🎯 Beacon</option>
+                            <option value="forge">🔨 Forge</option>
+                            <option value="echo">📢 Echo</option>
+                            <option value="scout">🔭 Scout</option>
+                            <option value="sentinel">🛡️ Sentinel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="app.closeTaskModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="app.createTask()">Create Task</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Agent Detail Modal -->
-    <div class="modal" id="agent-modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3 id="agent-modal-title">Agent Details</h3>
-                <button class="modal-close" onclick="app.closeAgentModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="agent-detail-grid">
-                    <div class="agent-info-section">
-                        <h4>Status</h4>
-                        <div class="agent-status-badge" id="agent-status-badge">Active</div>
-                        <div class="agent-current-task" id="agent-current-task">No task assigned</div>
-                    </div>
-                    <div class="agent-info-section">
-                        <h4>Session Key</h4>
-                        <code class="session-key-display" id="agent-session-key">agent:main:main</code>
-                    </div>
-                    <div class="agent-info-section">
-                        <h4>Quick Actions</h4>
-                        <div class="agent-actions">
-                            <button class="btn btn-primary btn-sm" id="agent-start-btn" onclick="app.toggleAgentStatus()">▶️ Start</button>
-                            <button class="btn btn-secondary btn-sm" onclick="app.viewAgentSoul()">📝 SOUL.md</button>
-                            <button class="btn btn-secondary btn-sm" onclick="app.viewAgentConfig()">⚙️ Config</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="agent-working-memory">
-                    <h4>Working Memory</h4>
-                    <textarea id="agent-working-content" class="working-memory-editor" placeholder="WORKING.md content..."></textarea>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Memory Editor Modal -->
-    <div class="modal" id="memory-modal">
-        <div class="modal-content modal-large">
-            <div class="modal-header">
-                <h3 id="memory-modal-title">Edit Memory</h3>
-                <button class="modal-close" onclick="app.closeMemoryModal()">×</button>
-            </div>
-            <div class="modal-body">
-                <textarea id="memory-editor" class="memory-editor" placeholder="File content..."></textarea>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="app.closeMemoryModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="app.saveMemoryFile()">Save Changes</button>
+                <button class="btn btn-secondary" onclick="app.hideTaskModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="app.saveTask()">Save Task</button>
             </div>
         </div>
     </div>

@@ -8,50 +8,43 @@ class MissionControl {
         this.currentAgent = null;
         this.currentMemoryFile = null;
 
-        // Agent data
+        // Agent data - 5 agents
         this.agents = [
-            { id: 'jarvis', name: 'Jarvis', avatar: '🤵', role: 'Lead Coordinator', session: 'agent:main:main', status: 'active', task: 'Managing agent workflow' },
-            { id: 'shuri', name: 'Shuri', avatar: '👩‍🔬', role: 'Product Analyst', session: 'agent:product-analyst:main', status: 'active', task: 'Analyzing product metrics' },
-            { id: 'fury', name: 'Fury', avatar: '🕶️', role: 'Security Lead', session: 'agent:security:main', status: 'idle', task: 'Monitoring system security' },
-            { id: 'vision', name: 'Vision', avatar: '🔮', role: 'Data Scientist', session: 'agent:data-scientist:main', status: 'active', task: 'Processing data streams' },
-            { id: 'loki', name: 'Loki', avatar: '🦹', role: 'DevOps Engineer', session: 'agent:devops:main', status: 'idle', task: 'Infrastructure management' },
-            { id: 'quill', name: 'Quill', avatar: '🧑‍🚀', role: 'Explorer', session: 'agent:explorer:main', status: 'blocked', task: 'Waiting for input' },
-            { id: 'wanda', name: 'Wanda', avatar: '🧙‍♀️', role: 'Context Manager', session: 'agent:context-manager:main', status: 'active', task: 'Maintaining conversation context' },
-            { id: 'pepper', name: 'Pepper', avatar: '👩‍💼', role: 'Administrator', session: 'agent:admin:main', status: 'active', task: 'Managing admin tasks' },
-            { id: 'friday', name: 'Friday', avatar: '🤖', role: 'Assistant', session: 'agent:assistant:main', status: 'idle', task: 'Ready for commands' },
-            { id: 'wong', name: 'Wong', avatar: '🧙‍♂️', role: 'Librarian', session: 'agent:librarian:main', status: 'active', task: 'Organizing knowledge base' }
+            { id: 'beacon', name: 'Beacon', avatar: '🎯', role: 'Product Strategist', session: 'agent:beacon:main', status: 'active', task: 'Exploring UpNextAnalytics.app' },
+            { id: 'forge', name: 'Forge', avatar: '🔨', role: 'Developer', session: 'agent:forge:main', status: 'idle', task: 'Waiting for first assignment' },
+            { id: 'echo', name: 'Echo', avatar: '📢', role: 'Content Creator', session: 'agent:echo:main', status: 'idle', task: 'Ready for content tasks' },
+            { id: 'scout', name: 'Scout', avatar: '🔭', role: 'Researcher', session: 'agent:scout:main', status: 'idle', task: 'Ready for research missions' },
+            { id: 'sentinel', name: 'Sentinel', avatar: '🛡️', role: 'QA', session: 'agent:sentinel:main', status: 'idle', task: 'Ready for testing' }
         ];
 
         // Tasks data
         this.tasks = [
-            { id: 1, title: 'Review PR #42', description: 'Code review for feature branch', priority: 'high', assignee: 'shuri', status: 'in_progress', createdAt: Date.now() - 3600000 },
-            { id: 2, title: 'Update documentation', description: 'Update API docs', priority: 'low', assignee: 'wong', status: 'assigned', createdAt: Date.now() - 7200000 },
-            { id: 3, title: 'Security audit', description: 'Weekly security check', priority: 'urgent', assignee: 'fury', status: 'inbox', createdAt: Date.now() - 1800000 },
-            { id: 4, title: 'Deploy to staging', description: 'Push latest changes', priority: 'medium', assignee: 'loki', status: 'review', createdAt: Date.now() - 14400000 },
-            { id: 5, title: 'Analyze user metrics', description: 'Weekly analytics report', priority: 'medium', assignee: 'vision', status: 'done', createdAt: Date.now() - 86400000 },
-            { id: 6, title: 'Setup new dev environment', description: 'Configure local environment', priority: 'low', assignee: 'quill', status: 'inbox', createdAt: Date.now() - 900000 },
-            { id: 7, title: 'Memory optimization', description: 'Optimize context handling', priority: 'high', assignee: 'wanda', status: 'in_progress', createdAt: Date.now() - 5400000 },
-            { id: 8, title: 'User onboarding flow', description: 'Design new user flow', priority: 'medium', assignee: 'pepper', status: 'assigned', createdAt: Date.now() - 10800000 }
+            { id: 1, title: 'Explore UpNextAnalytics.app', description: 'Identify 3 quick wins for the product', priority: 'high', assignee: 'beacon', status: 'in_progress', createdAt: Date.now() - 3600000 },
+            { id: 2, title: 'Write product blog post', description: 'Draft launch announcement', priority: 'medium', assignee: 'echo', status: 'assigned', createdAt: Date.now() - 7200000 },
+            { id: 3, title: 'Competitor analysis', description: 'Research top 5 competitors', priority: 'high', assignee: 'scout', status: 'inbox', createdAt: Date.now() - 1800000 },
+            { id: 4, title: 'Review PR #42', description: 'Code review for new feature', priority: 'medium', assignee: 'forge', status: 'review', createdAt: Date.now() - 14400000 },
+            { id: 5, title: 'Test new login flow', description: 'Verify all edge cases', priority: 'urgent', assignee: 'sentinel', status: 'in_progress', createdAt: Date.now() - 86400000 },
+            { id: 6, title: 'Update documentation', description: 'API docs for v2.0', priority: 'low', assignee: 'echo', status: 'inbox', createdAt: Date.now() - 900000 }
         ];
 
         // Activity feed
         this.activities = [
-            { agent: 'jarvis', action: 'assigned task', details: 'Review PR #42 to Shuri', time: '2m ago' },
-            { agent: 'wanda', action: 'updated context', details: 'Synced 15 conversation contexts', time: '5m ago' },
-            { agent: 'fury', action: 'completed scan', details: 'Security scan passed', time: '12m ago' },
-            { agent: 'vision', action: 'processed data', details: 'Analyzed 1.2GB of metrics', time: '18m ago' },
-            { agent: 'shuri', action: 'created PR', details: 'PR #43: New analytics feature', time: '25m ago' },
-            { agent: 'loki', action: 'deployed', details: 'v2.4.1 to production', time: '32m ago' }
+            { agent: 'beacon', action: 'started exploration', details: 'Exploring UpNextAnalytics.app', time: '5m ago' },
+            { agent: 'forge', action: 'completed build', details: 'v1.2.0 deployed to staging', time: '12m ago' },
+            { agent: 'scout', action: 'research complete', details: 'Competitor analysis for 5 apps', time: '25m ago' },
+            { agent: 'echo', action: 'published content', details: 'Launch blog post live', time: '32m ago' },
+            { agent: 'sentinel', action: 'verified fix', details: 'Login bug resolved', time: '45m ago' },
+            { agent: 'beacon', action: 'identified opportunity', details: '3 product features found', time: '1h ago' }
         ];
 
         // Memory files
         this.memoryFiles = {
             working: [
-                { name: 'WORKING-jarvis.md', agent: 'jarvis', updated: '5m ago' },
-                { name: 'WORKING-shuri.md', agent: 'shuri', updated: '12m ago' },
-                { name: 'WORKING-vision.md', agent: 'vision', updated: '8m ago' },
-                { name: 'WORKING-wanda.md', agent: 'wanda', updated: '3m ago' },
-                { name: 'WORKING-pepper.md', agent: 'pepper', updated: '20m ago' }
+                { name: 'WORKING-beacon.md', agent: 'beacon', updated: '5m ago' },
+                { name: 'WORKING-forge.md', agent: 'forge', updated: '12m ago' },
+                { name: 'WORKING-echo.md', agent: 'echo', updated: '8m ago' },
+                { name: 'WORKING-scout.md', agent: 'scout', updated: '3m ago' },
+                { name: 'WORKING-sentinel.md', agent: 'sentinel', updated: '20m ago' }
             ],
             daily: [
                 { name: 'memory/2025-02-01.md', updated: '2h ago' },
@@ -70,12 +63,11 @@ class MissionControl {
 
         // Session keys
         this.sessionKeys = [
-            { name: 'Main', key: 'agent:main:main' },
-            { name: 'Product Analyst', key: 'agent:product-analyst:main' },
-            { name: 'Security', key: 'agent:security:main' },
-            { name: 'Data Scientist', key: 'agent:data-scientist:main' },
-            { name: 'DevOps', key: 'agent:devops:main' },
-            { name: 'Explorer', key: 'agent:explorer:main' }
+            { name: 'Beacon', key: 'agent:beacon:main' },
+            { name: 'Forge', key: 'agent:forge:main' },
+            { name: 'Echo', key: 'agent:echo:main' },
+            { name: 'Scout', key: 'agent:scout:main' },
+            { name: 'Sentinel', key: 'agent:sentinel:main' }
         ];
 
         this.init();
@@ -311,8 +303,65 @@ class MissionControl {
 
     getWorkingMemory(agentId) {
         const memories = {
-            jarvis: `# Jarvis - Lead Coordinator\n\n## Current Focus\n- Managing agent workflow\n- Coordinating task assignments\n- Monitoring system health\n\n## Recent Actions\n- Assigned 5 tasks this hour\n- Reviewed 3 PRs\n- Synced with 8 agents`,
-            shuri: `# Shuri - Product Analyst\n\n## Current Focus\n- Analyzing product metrics\n- User engagement trends\n- Feature performance\n\n## Recent Actions\n- Generated weekly report\n- Analyzed 15k data points\n- Identified 3 insights`,
+            beacon: `# Beacon - Product Strategist
+
+## Current Focus
+- Exploring UpNextAnalytics.app
+- Identifying product opportunities
+- Building product ideas catalog
+
+## Recent Actions
+- Started first exploration mission
+- Identified 3 quick win opportunities
+
+## Next Steps
+1. Complete app exploration
+2. Document findings in notes/product-ideas.md
+3. Set up heartbeat for regular checks`,
+            forge: `# Forge - Developer
+
+## Current Focus
+- Waiting for first assignment
+- Ready to build and deploy
+
+## Ready For
+- Feature implementations
+- Code reviews
+- Bug fixes
+- Infrastructure tasks`,
+            echo: `# Echo - Content Creator
+
+## Current Focus
+- Ready for content tasks
+- Waiting for brief
+
+## Ready For
+- Blog posts
+- Social media content
+- Marketing copy
+- Email sequences`,
+            scout: `# Scout - Researcher
+
+## Current Focus
+- Ready for research missions
+- Standing by for queries
+
+## Ready For
+- Competitor analysis
+- Market research
+- Feature validation
+- User feedback synthesis`,
+            sentinel: `# Sentinel - QA
+
+## Current Focus
+- Ready for testing tasks
+- Standing by for bugs
+
+## Ready For
+- Feature testing
+- Bug verification
+- Regression testing
+- UX review`,
             default: `# Working Memory\n\nNo active tasks. Ready for assignment.`
         };
         return memories[agentId] || memories.default;
@@ -516,16 +565,11 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
             'AGENTS.md': `# AGENTS.md - Agent Configuration
 
 ## Agent Roles
-- **Jarvis**: Lead Coordinator - manages agent workflow
-- **Shuri**: Product Analyst - metrics and insights
-- **Fury**: Security Lead - system protection
-- **Vision**: Data Scientist - data processing
-- **Loki**: DevOps Engineer - infrastructure
-- **Quill**: Explorer - discovery tasks
-- **Wanda**: Context Manager - memory handling
-- **Pepper**: Administrator - admin tasks
-- **Friday**: Assistant - general assistance
-- **Wong**: Librarian - knowledge management`,
+- **Beacon**: Product Strategist - product ideas and strategy
+- **Forge**: Developer - builds and deploys features
+- **Echo**: Content Creator - writes and publishes content
+- **Scout**: Researcher - competitor analysis and research
+- **Sentinel**: QA - tests and verifies quality`,
 
             'TOOLS.md': `# TOOLS.md - Tool Configuration
 
@@ -552,11 +596,11 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
 - Personal OS is the main project
 - Multiple GitHub accounts to manage`,
 
-            'WORKING-jarvis.md': this.getWorkingMemory('jarvis'),
-            'WORKING-shuri.md': this.getWorkingMemory('shuri'),
-            'WORKING-vision.md': this.getWorkingMemory('vision'),
-            'WORKING-wanda.md': this.getWorkingMemory('wanda'),
-            'WORKING-pepper.md': this.getWorkingMemory('pepper')
+            'WORKING-beacon.md': this.getWorkingMemory('beacon'),
+            'WORKING-forge.md': this.getWorkingMemory('forge'),
+            'WORKING-echo.md': this.getWorkingMemory('echo'),
+            'WORKING-scout.md': this.getWorkingMemory('scout'),
+            'WORKING-sentinel.md': this.getWorkingMemory('sentinel')
         };
 
         return contents[fileName] || `# ${fileName}\n\nNo content available.`;

@@ -127,6 +127,7 @@ class MissionControl {
             this.renderConfig();
         } else if (viewName === 'reports') {
             this.renderReports();
+            this.loadHourlyReport();
         }
     }
 
@@ -839,6 +840,65 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
         this.showNotification('Refreshing reports...', 'info');
         await this.renderReports();
         this.showNotification('Reports updated', 'success');
+    }
+
+    async loadHourlyReport() {
+        const container = document.getElementById('hourly-report');
+        container.innerHTML = '<div class="loading">Loading...</div>';
+        
+        try {
+            const response = await fetch('/api/hourly-report');
+            const data = await response.json();
+            
+            if (data.success && data.report) {
+                // Convert markdown to HTML for display
+                const reportHtml = this.markdownToHtml(data.report);
+                container.innerHTML = reportHtml;
+            } else {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No hourly report yet</p>';
+            }
+        } catch (err) {
+            container.innerHTML = '<p style="color: var(--text-muted);">Error loading report</p>';
+        }
+    }
+
+    markdownToHtml(md) {
+        // Simple markdown to HTML conversion
+        let html = md;
+        
+        // Headers
+        html = html.replace(/^# (.*$)/gm, '<h3>$1</h3>');
+        html = html.replace(/^## (.*$)/gm, '<div class="report-section"><h4>$1</h4></div>');
+        
+        // Tables
+        html = html.replace(/\|(.+)\|/g, (match) => {
+            const cells = match.split('|').filter(c => c.trim());
+            if (cells[0].includes('---')) return '';
+            return `<tr>${cells.map(c => `<td>${c.trim()}</td>`).join('')}</tr>`;
+        });
+        html = html.replace(/<tr>.*<\/tr>\s*<tr>/g, '<table class="report-table"><thead>$&');
+        html = html.replace(/<tr><th>/g, '<table class="report-table"><thead><tr><th>');
+        html = html.replace(/<\/th><\/tr>/g, '</tr></thead><tbody>');
+        html = html.replace(/<\/td><\/tr>/g, '</td></tr></tbody></table>');
+        
+        // Lists
+        html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>\s*)+/g, '<ul class="next-list">$&</ul>');
+        
+        // Blockers (bold text)
+        html = html.replace(/\*\*(Beacon|Forge|Echo|Scout|Sentinel)\*\*/g, '<strong>$1</strong>');
+        
+        // Italic and bold
+        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        // Horizontal rules
+        html = html.replace(/^---$/gm, '<hr>');
+        
+        // Paragraphs
+        html = html.replace(/^(?!<[hluop]|<table)(.+)$/gm, '<p>$1</p>');
+        
+        return html;
     }
 
     // Utility

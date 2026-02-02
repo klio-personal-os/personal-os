@@ -36,22 +36,43 @@ function hash(content) {
 
 // Get latest task and status from WORKING.md
 function parseWorkingMd(content) {
-    const lines = content.split('\n');
     let status = 'idle';
     let currentTask = 'No task';
     let report = '';
     
     // Check status
-    if (content.includes('✅')) status = 'active';
+    if (content.includes('✅') && content.includes('ACTIVE')) status = 'active';
     else if (content.includes('⏸️') || content.includes('blocked')) status = 'blocked';
     
-    // Get current task
-    const taskMatch = content.match(/## Current Task[\s\S]*?\n([^#\n]+)/i);
-    if (taskMatch) {
-        currentTask = taskMatch[1].trim().substring(0, 100);
+    // Get current task - try multiple formats
+    // Format 1: ## Current Task
+    const taskMatch1 = content.match(/## Current Task[\s\S]*?\n([^#\n]+)/i);
+    if (taskMatch1) {
+        currentTask = taskMatch1[1].trim().substring(0, 100);
     }
     
-    // Get findings/opportunities - look for numbered list items (like "1. **Game Previews")
+    // Format 2: ## Current Sprint
+    const taskMatch2 = content.match(/## Current Sprint[:\s]*([^\n#]+)/i);
+    if (taskMatch2) {
+        currentTask = taskMatch2[1].trim().substring(0, 100);
+    }
+    
+    // Format 3: First line after "## Current Task" that's not a list item
+    const lines = content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        if (lines[i].toLowerCase().includes('current task') || lines[i].toLowerCase().includes('current sprint')) {
+            for (let j = i + 1; j < lines.length && j < i + 4; j++) {
+                const line = lines[j].trim();
+                if (line && !line.startsWith('-') && !line.startsWith('**') && !line.startsWith('##')) {
+                    currentTask = line.substring(0, 100);
+                    break;
+                }
+            }
+            break;
+        }
+    }
+    
+    // Get findings/opportunities - look for numbered list items
     const opportunities = [];
     const oppMatch = content.match(/\d+\.\s+\*\\*([^*]+)/g);
     if (oppMatch) {
@@ -60,13 +81,16 @@ function parseWorkingMd(content) {
         });
     }
     
-    // Get latest report - look for Recent Reports section
-    const recentMatch = content.match(/## Recent Reports[\s\S]*?-\s*([^#\n]+)/i);
+    // Get recent report - look for Recent Reports section or checkboxes
+    const recentMatch = content.match(/-\s*(\[[\sx]\]|\*\*COMPLETED\*\*|2026-[^:]+:[^#]+)/);
     if (recentMatch) {
-        report = recentMatch[1].trim();
+        report = recentMatch[1].replace('[ ]', '').replace('[x]', '').trim();
+        if (report.startsWith('**') && report.endsWith('**')) {
+            report = report.replace(/\*\*/g, '');
+        }
     } else if (opportunities.length > 0) {
-        // Use opportunities as the report
-        report = `Found ${opportunities.length} opportunities: ${opportunities.join(', ')}`;
+        // Use first opportunity as report
+        report = `Sprint: ${currentTask}`;
     }
     
     return { status, currentTask, report };

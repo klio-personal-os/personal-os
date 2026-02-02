@@ -139,6 +139,32 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: Date.now() });
 });
 
+// Get hourly agent report
+app.get('/api/hourly-report', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    
+    const reportPath = path.join(__dirname, 'reports', 'hourly-report.md');
+    
+    try {
+        if (fs.existsSync(reportPath)) {
+            const content = fs.readFileSync(reportPath, 'utf-8');
+            res.json({
+                success: true,
+                report: content,
+                generated: fs.statSync(reportPath).mtime
+            });
+        } else {
+            res.json({
+                success: false,
+                message: 'No hourly report generated yet'
+            });
+        }
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // Main route - serve the app
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

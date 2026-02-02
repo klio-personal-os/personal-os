@@ -1,185 +1,61 @@
 // Vercel serverless function - Reports API
-// Aggregates all agent outputs and reports
+// Aggregates all agent outputs and reports from JSON
 
-const CLAWD_PATH = process.env.CLAWD_PATH || '/home/ben/clawd';
+const fs = require('fs');
+const path = require('path');
 
-// Mock data for serverless environment
-const getMockReports = () => ({
-    reports: [
-        {
-            agent: { id: 'beacon', name: 'Beacon', role: 'Product Strategist', avatar: '🎯' },
-            status: 'active',
-            currentTask: 'Exploring UpNextAnalytics.app',
-            findings: [
-                { type: 'idea', content: 'Add dark mode toggle for better accessibility' },
-                { type: 'research', content: 'Competitor analysis: 3 similar apps have subscription models' }
-            ],
-            recentNotes: []
-        },
-        {
-            agent: { id: 'forge', name: 'Forge', role: 'Developer', avatar: '🔨' },
-            status: 'idle',
-            currentTask: 'Waiting for first assignment',
-            findings: [],
-            recentNotes: []
-        },
-        {
-            agent: { id: 'echo', name: 'Echo', role: 'Content Creator', avatar: '📢' },
-            status: 'idle',
-            currentTask: 'Ready for content tasks',
-            findings: [],
-            recentNotes: []
-        },
-        {
-            agent: { id: 'scout', name: 'Scout', role: 'Researcher', avatar: '🔭' },
-            status: 'idle',
-            currentTask: 'Ready for research missions',
-            findings: [],
-            recentNotes: []
-        },
-        {
-            agent: { id: 'sentinel', name: 'Sentinel', role: 'QA', avatar: '🛡️' },
-            status: 'idle',
-            currentTask: 'Ready for testing',
-            findings: [],
-            recentNotes: []
-        }
-    ],
-    activities: [
-        { agent: 'Beacon', agentId: 'beacon', agentAvatar: '🎯', action: 'Started exploration of UpNextAnalytics.app', time: 'Recent' },
-        { agent: 'Forge', agentId: 'forge', agentAvatar: '🔨', action: 'Built v1.2.0 and deployed to staging', time: '2h ago' },
-        { agent: 'Scout', agentId: 'scout', agentAvatar: '🔭', action: 'Completed competitor analysis for 5 apps', time: '3h ago' }
-    ],
-    ideas: [
-        { text: 'Dark mode toggle for accessibility', source: 'product-ideas.md' },
-        { text: 'Push notifications for task updates', source: 'product-ideas.md' },
-        { text: 'Weekly analytics dashboard', source: 'product-ideas.md' }
-    ]
-});
+const REPORTS_PATH = path.join(__dirname, '..', 'reports', 'agent-reports.json');
 
-// Try to get real data from file system
-function getRealReports() {
+function getReportsData() {
     try {
-        const fs = require('fs');
-        const path = require('path');
-        
-        if (!fs.existsSync(CLAWD_PATH)) {
-            return null;
+        if (fs.existsSync(REPORTS_PATH)) {
+            return JSON.parse(fs.readFileSync(REPORTS_PATH, 'utf-8'));
         }
-        
-        const AGENTS = [
-            { id: 'beacon', name: 'Beacon', role: 'Product Strategist', avatar: '🎯' },
-            { id: 'forge', name: 'Forge', role: 'Developer', avatar: '🔨' },
-            { id: 'echo', name: 'Echo', role: 'Content Creator', avatar: '📢' },
-            { id: 'scout', name: 'Scout', role: 'Researcher', avatar: '🔭' },
-            { id: 'sentinel', name: 'Sentinel', role: 'QA', avatar: '🛡️' }
-        ];
-        
-        const reports = [];
-        const activities = [];
-        const ideas = [];
-        
-        for (const agent of AGENTS) {
-            const workingMdPath = path.join(CLAWD_PATH, 'agents', agent.id, 'memory', 'WORKING.md');
-            
-            let currentTask = 'No active task';
-            let status = 'idle';
-            let findings = [];
-            
-            if (fs.existsSync(workingMdPath)) {
-                const content = fs.readFileSync(workingMdPath, 'utf-8');
-                
-                const taskMatch = content.match(/## Current Task\s*\n\s*[\*•]?\s*([^\n]+)/i);
-                if (taskMatch) {
-                    currentTask = taskMatch[1].trim().replace(/^[\*\•]\s*/, '');
-                }
-                
-                if (content.includes('✅')) {
-                    status = 'active';
-                } else if (content.includes('⏸️') || content.includes('blocked')) {
-                    status = 'blocked';
-                }
-                
-                const ideasMatch = content.match(/## Ideas?[:\s]*([^\n]*(?:\n+[^\n]+)*)/gi);
-                if (ideasMatch) {
-                    ideasMatch.forEach(match => {
-                        const cleaned = match.replace(/## Ideas?[:\s]*/i, '').trim();
-                        if (cleaned) findings.push({ type: 'idea', content: cleaned });
-                    });
-                }
-                
-                const researchMatch = content.match(/## Research[:\s]*([^\n]*(?:\n+[^\n]+)*)/gi);
-                if (researchMatch) {
-                    researchMatch.forEach(match => {
-                        const cleaned = match.replace(/## Research[:\s]*/i, '').trim();
-                        if (cleaned) findings.push({ type: 'research', content: cleaned });
-                    });
-                }
-            }
-            
-            reports.push({
-                agent: agent,
-                status: status,
-                currentTask: currentTask,
-                findings: findings,
-                recentNotes: []
-            });
-            
-            // Add activity if agent is active
-            if (status === 'active') {
-                activities.push({
-                    agent: agent.name,
-                    agentId: agent.id,
-                    agentAvatar: agent.avatar,
-                    action: `Working on: ${currentTask}`,
-                    time: 'Active'
-                });
-            }
-        }
-        
-        // Get ideas from Beacon's notes
-        const beaconNotesPath = path.join(CLAWD_PATH, 'agents', 'beacon', 'notes');
-        if (fs.existsSync(beaconNotesPath)) {
-            const files = fs.readdirSync(beaconNotesPath).filter(f => f.endsWith('.md'));
-            for (const file of files) {
-                const filePath = path.join(beaconNotesPath, file);
-                const content = fs.readFileSync(filePath, 'utf-8');
-                const ideasMatch = content.match(/- .+/g);
-                if (ideasMatch) {
-                    ideasMatch.forEach(idea => {
-                        const cleaned = idea.replace(/^- /, '').trim();
-                        if (cleaned.length > 10) {
-                            ideas.push({ text: cleaned, source: file });
-                        }
-                    });
-                }
-            }
-        }
-        
-        return { reports, activities, ideas };
     } catch (err) {
         console.error('Error reading reports:', err);
-        return null;
     }
+    return null;
 }
 
 module.exports = (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     
-    const realData = getRealReports();
+    const data = getReportsData();
     
-    if (realData) {
+    if (data) {
+        // Format for frontend
+        const reports = Object.entries(data.agents || {}).map(([id, agent]) => ({
+            agent: { id, name: agent.name, role: agent.role, avatar: getAvatar(id) },
+            status: agent.status,
+            currentTask: agent.currentTask,
+            report: agent.report
+        }));
+        
         res.status(200).json({
             success: true,
-            ...realData,
-            timestamp: new Date().toISOString()
+            reports: reports,
+            activities: [], // Could add activity tracking later
+            ideas: [], // Could add ideas from separate file
+            timestamp: data.lastUpdated
         });
     } else {
-        const mockData = getMockReports();
         res.status(200).json({
             success: true,
-            ...mockData,
+            reports: [],
+            activities: [],
+            ideas: [],
             timestamp: new Date().toISOString()
         });
     }
 };
+
+function getAvatar(id) {
+    const avatars = {
+        beacon: '🎯',
+        forge: '🔨',
+        echo: '📢',
+        scout: '🔭',
+        sentinel: '🛡️'
+    };
+    return avatars[id] || '🤖';
+}

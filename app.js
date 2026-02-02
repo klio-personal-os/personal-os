@@ -1,29 +1,50 @@
 // Mission Control - Task Board Application
 class MissionControl {
     constructor() {
-        this.tasks = this.loadTasks();
-        this.features = this.loadFeatures();
-        this.editingTaskId = null;
-        this.init();
+        this.initAsync();
     }
 
-    init() {
+    async initAsync() {
+        this.tasks = await this.loadTasks();
+        this.features = this.loadFeatures();
+        this.editingTaskId = null;
         this.bindNavigation();
         this.bindDragDrop();
-        this.render();
+        await this.render();
+    }
+        this.initAsync();
+    }
+
+    async initAsync() {
+        this.tasks = await this.loadTasks();
+        this.features = this.loadFeatures();
+        this.editingTaskId = null;
+        this.bindNavigation();
+        this.bindDragDrop();
+        await this.render();
     }
 
     // Data persistence
-    loadTasks() {
+    async loadTasks() {
         try {
-            return JSON.parse(localStorage.getItem('tasks') || '[]');
+            const response = await fetch('/api/tasks');
+            const data = await response.json();
+            return data.tasks || [];
         } catch {
             return [];
         }
     }
 
-    saveTasks() {
-        localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    async saveTasks() {
+        try {
+            await fetch('/api/tasks', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tasks: this.tasks })
+            });
+        } catch (err) {
+            console.error('Failed to save tasks:', err);
+        }
         this.render();
     }
 

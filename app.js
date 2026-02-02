@@ -128,6 +128,12 @@ class MissionControl {
         } else if (viewName === 'reports') {
             this.renderReports();
             this.loadHourlyReport();
+            // Auto-refresh every 30 seconds
+            if (this.reportsInterval) clearInterval(this.reportsInterval);
+            this.reportsInterval = setInterval(() => {
+                this.renderReports();
+                this.loadHourlyReport();
+            }, 30000);
         }
     }
 

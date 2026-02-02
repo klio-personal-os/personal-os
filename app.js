@@ -857,8 +857,7 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
             const data = await response.json();
             
             if (data.success && data.report) {
-                // Convert markdown to HTML for display
-                const reportHtml = this.markdownToHtml(data.report);
+                const reportHtml = this.formatReportHtml(data.report);
                 container.innerHTML = reportHtml;
             } else {
                 container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No hourly report yet</p>';

@@ -862,43 +862,66 @@ You are Clawdbot, a multi-agent AI system designed to help humans manage complex
         }
     }
 
-    markdownToHtml(md) {
-        // Simple markdown to HTML conversion
-        let html = md;
+    formatReportHtml(md) {
+        const lines = md.split('\n');
+        let html = '';
+        let inTable = false;
+        let section = '';
         
-        // Headers
-        html = html.replace(/^# (.*$)/gm, '<h3>$1</h3>');
-        html = html.replace(/^## (.*$)/gm, '<div class="report-section"><h4>$1</h4></div>');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const trimmed = line.trim();
+            
+            if (trimmed.startsWith('# ')) {
+                html += `<div class="report-header"><h3>${trimmed.substring(2)}</h3></div>`;
+            } else if (trimmed.startsWith('## ')) {
+                if (inTable) { html += '</tbody></table>'; inTable = false; }
+                section = trimmed.substring(3).toLowerCase();
+                html += `<div class="report-section"><h4>${trimmed.substring(3)}</h4>`;
+            } else if (trimmed.startsWith('|') && trimmed.includes('---')) {
+                continue;
+            } else if (trimmed.startsWith('|') && !inTable) {
+                inTable = true;
+                html += '<table class="report-table"><tbody>';
+            } else if (trimmed.startsWith('|') && inTable) {
+                const cells = trimmed.split('|').filter(c => c.trim());
+                if (cells.length > 1) {
+                    html += '<tr>';
+                    for (let j = 1; j < cells.length - 1; j++) {
+                        html += `<td>${cells[j].trim()}</td>`;
+                    }
+                    html += '</tr>';
+                }
+            } else if (trimmed.startsWith('- **') && inTable) {
+                html += '</tbody></table>';
+                inTable = false;
+                const match = trimmed.match(/\*\*(.+?)\*\*:?(.+)/);
+                if (match) {
+                    html += `<div class="blocker-item"><strong>${match[1]}</strong>${match[2] || ''}</div>`;
+                }
+            } else if (trimmed.startsWith('- **')) {
+                const match = trimmed.match(/\*\*(.+?)\*\*:?(.+)/);
+                if (match) {
+                    html += `<div class="blocker-item"><strong>${match[1]}</strong>${match[2] || ''}</div>`;
+                }
+            } else if (trimmed.startsWith('- ')) {
+                html += `<li>${trimmed.substring(2)}</li>`;
+            } else if (trimmed.startsWith('*') && trimmed.includes('Generated')) {
+                html += `<div class="report-meta">${trimmed.replace(/\*/g, '')}</div>`;
+            } else if (trimmed === '---') {
+                if (inTable) { html += '</tbody></table>'; inTable = false; }
+                html += '</div>';
+            } else if (trimmed && !trimmed.startsWith('|')) {
+                html += `<p>${trimmed}</p>`;
+            }
+        }
         
-        // Tables
-        html = html.replace(/\|(.+)\|/g, (match) => {
-            const cells = match.split('|').filter(c => c.trim());
-            if (cells[0].includes('---')) return '';
-            return `<tr>${cells.map(c => `<td>${c.trim()}</td>`).join('')}</tr>`;
-        });
-        html = html.replace(/<tr>.*<\/tr>\s*<tr>/g, '<table class="report-table"><thead>$&');
-        html = html.replace(/<tr><th>/g, '<table class="report-table"><thead><tr><th>');
-        html = html.replace(/<\/th><\/tr>/g, '</tr></thead><tbody>');
-        html = html.replace(/<\/td><\/tr>/g, '</td></tr></tbody></table>');
+        if (inTable) html += '</tbody></table>';
         
-        // Lists
-        html = html.replace(/^- (.*$)/gm, '<li>$1</li>');
-        html = html.replace(/(<li>.*<\/li>\s*)+/g, '<ul class="next-list">$&</ul>');
+        // Wrap lists
+        html = html.replace(/(<li>.*<\/li>\s*)+/g, '<ul class="report-list">$&</ul>');
         
-        // Blockers (bold text)
-        html = html.replace(/\*\*(Beacon|Forge|Echo|Scout|Sentinel)\*\*/g, '<strong>$1</strong>');
-        
-        // Italic and bold
-        html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
-        
-        // Horizontal rules
-        html = html.replace(/^---$/gm, '<hr>');
-        
-        // Paragraphs
-        html = html.replace(/^(?!<[hluop]|<table)(.+)$/gm, '<p>$1</p>');
-        
-        return html;
+        return `<div class="hourly-report-content">${html}</div>`;
     }
 
     // Utility

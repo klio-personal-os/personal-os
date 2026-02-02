@@ -7,7 +7,7 @@ const AGENTS = [
         name: 'Beacon', 
         role: 'Product Strategist',
         status: 'active',
-        task: 'Exploring UpNextAnalytics.app',
+        currentTask: 'Exploring UpNextAnalytics.app',
         lastHeartbeat: new Date().toISOString().split('T')[0]
     },
     { 
@@ -15,7 +15,7 @@ const AGENTS = [
         name: 'Forge', 
         role: 'Developer',
         status: 'idle',
-        task: 'Waiting for first assignment',
+        currentTask: 'Waiting for first assignment',
         lastHeartbeat: new Date().toISOString().split('T')[0]
     },
     { 
@@ -23,7 +23,7 @@ const AGENTS = [
         name: 'Echo', 
         role: 'Content Creator',
         status: 'idle',
-        task: 'Ready for content tasks',
+        currentTask: 'Ready for content tasks',
         lastHeartbeat: new Date().toISOString().split('T')[0]
     },
     { 
@@ -31,7 +31,7 @@ const AGENTS = [
         name: 'Scout', 
         role: 'Researcher',
         status: 'idle',
-        task: 'Ready for research missions',
+        currentTask: 'Ready for research missions',
         lastHeartbeat: new Date().toISOString().split('T')[0]
     },
     { 
@@ -39,7 +39,7 @@ const AGENTS = [
         name: 'Sentinel', 
         role: 'QA',
         status: 'idle',
-        task: 'Ready for testing',
+        currentTask: 'Ready for testing',
         lastHeartbeat: new Date().toISOString().split('T')[0]
     }
 ];

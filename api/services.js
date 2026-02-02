@@ -8,12 +8,20 @@ const services = {
 };
 
 export default function handler(req, res) {
-    const { method } = req;
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    const { method, query } = req;
+    const { serviceId, action } = query;
 
     if (method === 'GET') {
-        res.json(services);
+        res.status(200).json(services);
     } else if (method === 'POST') {
-        const { serviceId, action } = req.query;
         const service = services[serviceId];
 
         if (!service) {
@@ -35,7 +43,7 @@ export default function handler(req, res) {
                 return res.status(400).json({ error: 'Invalid action' });
         }
 
-        res.json({ success: true, service: serviceId, action, status: service.status });
+        res.status(200).json({ success: true, service: serviceId, action, status: service.status });
     } else {
         res.status(405).json({ error: 'Method not allowed' });
     }

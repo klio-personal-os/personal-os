@@ -1,7 +1,7 @@
 {
   "name": "personal-os",
   "framework": null,
-  "buildCommand": "npm run build",
+  "buildCommand": "",
   "outputDirectory": ".",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
@@ -9,11 +9,5 @@
     "enabled": true,
     "autoAlias": true,
     "silent": false
-  },
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
-    }
-  ]
+  }
 }

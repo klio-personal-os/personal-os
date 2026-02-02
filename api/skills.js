@@ -11,12 +11,20 @@ const skills = {
 };
 
 export default function handler(req, res) {
-    const { method } = req;
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+
+    const { method, query } = req;
+    const { skillId, action } = query;
 
     if (method === 'GET') {
-        res.json(skills);
+        res.status(200).json(skills);
     } else if (method === 'POST') {
-        const { skillId, action } = req.query;
         const skill = skills[skillId];
 
         if (!skill) {
@@ -37,7 +45,7 @@ export default function handler(req, res) {
                 return res.status(400).json({ error: 'Invalid action' });
         }
 
-        res.json({ success: true, skill: skillId, action, status: skill.status });
+        res.status(200).json({ success: true, skill: skillId, action, status: skill.status });
     } else {
         res.status(405).json({ error: 'Method not allowed' });
     }

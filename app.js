@@ -29,9 +29,22 @@ class PersonalOS {
 
     init() {
         this.updateClock();
+        this.fetchSystemStatus();
         this.startStatusUpdates();
         setInterval(() => this.updateClock(), 1000);
         this.setupEventListeners();
+    }
+
+    async fetchSystemStatus() {
+        try {
+            const response = await fetch('/api/status');
+            if (response.ok) {
+                const data = await response.json();
+                this.systemStatus = data;
+            }
+        } catch (error) {
+            console.log('Using simulated status (API not available)');
+        }
     }
 
     updateClock() {

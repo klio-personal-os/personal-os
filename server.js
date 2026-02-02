@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(__dirname));
 app.use(express.json());
 
-// Store for system state (in production, use proper state management)
+// Store for system state
 const systemState = {
     services: {
         gateway: { status: 'running', port: 3000 },
@@ -30,7 +30,9 @@ const systemState = {
     }
 };
 
+// =======================
 // API Routes
+// =======================
 
 // Get system status
 app.get('/api/status', (req, res) => {
@@ -41,7 +43,7 @@ app.get('/api/status', (req, res) => {
     res.json({
         status: 'online',
         uptime: uptime,
-        cpu: cpuUsage.user / 1000000, // Convert to percentage
+        cpu: cpuUsage.user / 1000000,
         memory: Math.round((memory.heapUsed / memory.heapTotal) * 100),
         sessions: [
             { id: 'web-1', name: 'Web Chat', status: 'active', connectedAt: Date.now() - 720000 },
@@ -64,8 +66,6 @@ app.post('/api/services/:serviceId/:action', (req, res) => {
         return res.status(404).json({ error: 'Service not found' });
     }
 
-    // In production, this would actually start/stop/restart the service
-    // For now, we simulate the action
     switch(action) {
         case 'start':
             service.status = 'running';
@@ -124,7 +124,6 @@ app.post('/api/skills/:skillId/execute', (req, res) => {
         return res.status(404).json({ error: 'Skill not found' });
     }
 
-    // Log the action (in production, this would actually execute)
     console.log(`Executing ${action} on skill ${skillId}`);
 
     res.json({
@@ -135,33 +134,7 @@ app.post('/api/skills/:skillId/execute', (req, res) => {
     });
 });
 
-// Execute a terminal command (sandboxed)
-app.post('/api/terminal', (req, res) => {
-    const { command } = req.body;
-
-    // Dangerous commands that should be blocked
-    const blockedCommands = ['rm', 'sudo', 'chmod', 'chown', 'mkfs', 'dd', 'format'];
-
-    const isBlocked = blockedCommands.some(cmd => command.startsWith(cmd));
-
-    if (isBlocked) {
-        return res.json({
-            output: `Command blocked for security reasons: ${command}`,
-            type: 'error'
-        });
-    }
-
-    // Execute the command
-    exec(command, { timeout: 5000, maxBuffer: 1024 * 1024 }, (error, stdout, stderr) => {
-        if (error) {
-            res.json({ output: stderr || error.message, type: 'error' });
-        } else {
-            res.json({ output: stdout, type: 'success' });
-        }
-    });
-});
-
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: Date.now() });
 });

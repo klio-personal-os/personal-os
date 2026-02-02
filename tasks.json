@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "1",
+    "title": "Design Stat Stories card templates",
+    "desc": "Create HTML/CSS prototypes for player stat cards, match previews, and achievement celebrations",
+    "agent": "beacon",
+    "priority": "high",
+    "status": "doing",
+    "createdAt": "2026-02-02T18:00:00Z"
+  },
+  {
+    "id": "2",
+    "title": "Build card generation component",
+    "desc": "Implement React component for generating shareable stat cards with PNG export",
+    "agent": "forge",
+    "priority": "high",
+    "status": "doing",
+    "createdAt": "2026-02-02T18:00:00Z"
+  },
+  {
+    "id": "3",
+    "title": "Write social media copy",
+    "desc": "Create Instagram captions, Twitter thread, and email announcement for Stat Stories launch",
+    "agent": "echo",
+    "priority": "medium",
+    "status": "todo",
+    "createdAt": "2026-02-02T18:00:00Z"
+  },
+  {
+    "id": "4",
+    "title": "Research competitor stat cards",
+    "desc": "Analyze how other sports apps share stats on Instagram. Find 10 examples.",
+    "agent": "scout",
+    "priority": "medium",
+    "status": "todo",
+    "createdAt": "2026-02-02T18:00:00Z"
+  },
+  {
+    "id": "5",
+    "title": "Test login flow edge cases",
+    "desc": "Comprehensive QA testing for authentication flow",
+    "agent": "sentinel",
+    "priority": "medium",
+    "status": "backlog",
+    "createdAt": "2026-02-02T18:00:00Z"
+  }
+]
